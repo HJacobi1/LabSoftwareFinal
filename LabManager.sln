@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36127.28 d17.14
+VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{23776843-ED10-4FB9-9C4A-88FE23782EFC}"
 EndProject
@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL_Tests", "BLL_Tests\BLL_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{60BE12C9-FC56-4C1C-B343-74B20A159D00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoUI", "ProtoUI\ProtoUI.csproj", "{20346421-586D-467E-B488-84BB00C33F69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{FC9096A0-686D-4BE8-B6B4-1833EF1D2242}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{60BE12C9-FC56-4C1C-B343-74B20A159D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60BE12C9-FC56-4C1C-B343-74B20A159D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60BE12C9-FC56-4C1C-B343-74B20A159D00}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20346421-586D-467E-B488-84BB00C33F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20346421-586D-467E-B488-84BB00C33F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20346421-586D-467E-B488-84BB00C33F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20346421-586D-467E-B488-84BB00C33F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC9096A0-686D-4BE8-B6B4-1833EF1D2242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC9096A0-686D-4BE8-B6B4-1833EF1D2242}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC9096A0-686D-4BE8-B6B4-1833EF1D2242}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC9096A0-686D-4BE8-B6B4-1833EF1D2242}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
