@@ -6,7 +6,7 @@ namespace DAL.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<Pessoa> Pessoas { get; set; }
+        public DbSet<PessoaEntidade> Pessoas { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,7 +18,7 @@ namespace DAL.Data
             base.OnModelCreating(modelBuilder);
 
             // Configure Pessoa entity
-            modelBuilder.Entity<Pessoa>(entity =>
+            modelBuilder.Entity<PessoaEntidade>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);

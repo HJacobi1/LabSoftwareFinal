@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DAL.Models
 {
     [Table("Pessoas")]
-    public class Pessoa : BaseEntity
+    public class PessoaEntidade : BaseEntity
     {
         [Required]
         [StringLength(100)]
