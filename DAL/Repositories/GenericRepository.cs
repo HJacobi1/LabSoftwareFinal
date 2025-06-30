@@ -1,4 +1,4 @@
-using DAL.Data;
+//using DAL.Data;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -7,10 +7,10 @@ namespace DAL.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
-        protected readonly ApplicationDbContext _context;
+        protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public GenericRepository(ApplicationDbContext context)
+        public GenericRepository(AppDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
@@ -64,8 +64,8 @@ namespace DAL.Repositories
         {
             if (expression == null)
                 return await _dbSet.CountAsync();
-            
+
             return await _dbSet.CountAsync(expression);
-        }
+        }                
     }
-} 
+}

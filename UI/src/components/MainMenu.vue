@@ -13,6 +13,18 @@
       <router-link to="/equipamentos" class="menu-item">
         <i class="fas fa-microscope"></i>
         <span>Equipamentos</span>
+      </router-link>
+      <router-link to="/laboratorios" class="menu-item">
+        <i class="fas fa-flask"></i>
+        <span>Laboratórios</span>
+      </router-link>
+      <router-link to="/solicitacoes" class="menu-item">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Solicitações</span>
+      </router-link>
+      <router-link to="/gerenciar-laboratorio" class="menu-item">
+        <i class="fas fa-cogs"></i>
+        <span>Gerenciar Laboratório</span>
       </router-link>      
     </nav>
   </div>

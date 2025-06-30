@@ -1,4 +1,4 @@
-﻿using DAL.Data;
+﻿//using DAL.Data;
 using DAL.Models;
 using DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -8,14 +8,14 @@ namespace DAL
 {
     public class Repository : IDisposable
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;
         private bool _disposed;
-
+        
         public Repository(IConfiguration configuration)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
-            _context = new ApplicationDbContext(optionsBuilder.Options);
+            _context = new AppDbContext(optionsBuilder.Options);
         }
 
         private Dictionary<Type, object> _repositories;
@@ -48,7 +48,7 @@ namespace DAL
         {
             if (!_disposed && disposing)
             {
-                _context.Dispose();
+               _context.Dispose();
             }
             _disposed = true;
         }
