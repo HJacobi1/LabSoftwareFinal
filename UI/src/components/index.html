@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendário de Eventos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background: #f9f9f9;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+      }
+
+      .day {
+        background: white;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .day:hover {
+        background-color: #e6f7ff;
+      }
+
+      .header {
+        font-weight: bold;
+        background: #ddd;
+      }
+
+      .event-dot {
+        width: 8px;
+        height: 8px;
+        background-color: red;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .event-details {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff;
+        border: 1px solid #ccc;
+      }
+
+      .event-details h3 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Calendário de Eventos - Julho 2025</h1>
+
+    <div class="calendar" id="calendar"></div>
+
+    <div class="event-details" id="eventDetails" style="display: none">
+      <h3>Eventos no dia <span id="selectedDate"></span></h3>
+      <ul id="eventList"></ul>
+    </div>
+
+    <script>
+      const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+
+      const eventos = {
+        "2025-07-05": [
+          {
+            tipo: "Manutenção",
+            equipamento: "Microscópio A",
+            responsavel: "Carlos",
+          },
+        ],
+        "2025-07-12": [
+          { tipo: "Calibração", equipamento: "Balança B", responsavel: "Ana" },
+          {
+            tipo: "Manutenção",
+            equipamento: "Centrífuga C",
+            responsavel: "João",
+          },
+        ],
+        "2025-07-25": [
+          { tipo: "Calibração", equipamento: "PHmetro", responsavel: "Maria" },
+        ],
+      }
+
+      function criarCalendario(mes, ano) {
+        const calendario = document.getElementById("calendar")
+        calendario.innerHTML = ""
+
+        diasSemana.forEach((dia) => {
+          const cell = document.createElement("div")
+          cell.className = "day header"
+          cell.textContent = dia
+          calendario.appendChild(cell)
+        })
+
+        const primeiroDia = new Date(ano, mes, 1)
+        const ultimoDia = new Date(ano, mes + 1, 0)
+        const inicioSemana = primeiroDia.getDay()
+        const totalDias = ultimoDia.getDate()
+
+        for (let i = 0; i < inicioSemana; i++) {
+          const vazio = document.createElement("div")
+          calendario.appendChild(vazio)
+        }
+
+        for (let dia = 1; dia <= totalDias; dia++) {
+          const dataStr = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(
+            dia
+          ).padStart(2, "0")}`
+          const cell = document.createElement("div")
+          cell.className = "day"
+          cell.textContent = dia
+
+          if (eventos[dataStr]) {
+            const dot = document.createElement("div")
+            dot.className = "event-dot"
+            cell.appendChild(dot)
+            cell.addEventListener("click", () => mostrarEventos(dataStr))
+          }
+
+          calendario.appendChild(cell)
+        }
+      }
+
+      function mostrarEventos(data) {
+        const lista = document.getElementById("eventList")
+        const detalhes = document.getElementById("eventDetails")
+        const titulo = document.getElementById("selectedDate")
+
+        const eventosDia = eventos[data]
+        titulo.textContent = data
+        lista.innerHTML = ""
+
+        eventosDia.forEach((e) => {
+          const li = document.createElement("li")
+          li.textContent = `${e.tipo} - ${e.equipamento} (Responsável: ${e.responsavel})`
+          lista.appendChild(li)
+        })
+
+        detalhes.style.display = "block"
+      }
+
+      criarCalendario(6, 2025)
+    </script>
+  </body>
+</html>
