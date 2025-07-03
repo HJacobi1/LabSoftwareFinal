@@ -11,4 +11,8 @@ public partial class PessoaEntidade : BaseEntity
 
     public string Contato { get; set; }
 
- }
+    public int LaboratorioId { get; set; }
+    public LaboratorioEntidade Laboratorio { get; set; }
+
+    public virtual UsuarioEntidade Usuario { get; set; }
+}

@@ -7,5 +7,7 @@ namespace DAL.Repositories
         Task<UsuarioEntidade?> GetByEmailAsync(string email);
         Task<bool> EmailExistsAsync(string email);
         Task<UsuarioEntidade?> AuthenticateAsync(string email, string senha);
+        Task<List<UsuarioEntidade>> GetByLaboratorioIdAsync(int id);
+        Task<UsuarioEntidade?> GetByPessoaIdAsync(int id);
     }
 } 

@@ -33,13 +33,17 @@ const routes = [
         component: GerenciadorLaboratorio
       },
       {
+        path: 'usuarios',
+        name: 'usuarios',
+        component: Usuarios
+      },
+      {
         path: '',
         redirect: '/pessoas'
       }
     ]
   },
-  { path: '/login', component: Login },
-  { path: '/usuarios', component: Usuarios }
+  { path: '/login', component: Login }
 ]
 
 const router = createRouter({
@@ -55,6 +59,29 @@ router.beforeEach((to, from, next) => {
   if (authRequired && !loggedIn) {
     return next('/login');
   }
+
+  // Rotas restritas para admin
+  const adminRoutes = ['pessoas', 'equipamentos', 'laboratorios', 'usuarios'];
+  if (adminRoutes.includes(to.name)) {
+    const token = localStorage.getItem('token');
+    if (!token) return next('/login');
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.isAdmin || payload.isAdmin === 'false') {
+        // Se não for admin, redireciona para gerenciador-laboratorio
+        return next({ name: 'gerenciador-laboratorio' });
+      }
+    } catch (e) {
+      return next('/login');
+    }
+  }
+
+  // Usuários não admins só podem acessar gerenciador-laboratorio
+  if (to.name === 'gerenciador-laboratorio') {
+    // Qualquer usuário autenticado pode acessar
+    return next();
+  }
+
   next();
 });
 

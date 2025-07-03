@@ -18,5 +18,7 @@ namespace BLL.Models
         [Required]
         public string Senha { get; set; } = string.Empty;
         public bool IsAdmin { get; set; }
+        public int? PessoaId { get; set; }
+        public int? LaboratorioId { get; set; }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL.Models;
 using BLL.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace API.Controllers
 {
@@ -9,20 +8,20 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class SolicitacaoController : ControllerBase
     {
-        private readonly PessoaService _pessoaService;
+        private readonly ISolicitacaoService _solicitacaoService;
 
-        public SolicitacaoController(IConfiguration configuration)
+        public SolicitacaoController(ISolicitacaoService solicitacaoService)
         {
-            _pessoaService = new PessoaService(configuration);
+            _solicitacaoService = solicitacaoService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> GetPessoas()
+        public async Task<ActionResult<IEnumerable<Solicitacao>>> GetSolicitacoes()
         {
             try
             {
-                var pessoas = await _pessoaService.GetAllPessoasAsync();
-                return Ok(pessoas);
+                var solicitacoes = await _solicitacaoService.GetAllSolicitacoesAsync();
+                return Ok(solicitacoes);
             }
             catch (Exception ex)
             {
@@ -31,15 +30,15 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pessoa>> GetPessoaPorId(int id)
+        public async Task<ActionResult<Solicitacao>> GetSolicitacaoPorId(int id)
         {
             try
             {
-                var pessoa = await _pessoaService.GetPessoaByIdAsync(id);
-                if (pessoa == null)
-                    return NotFound($"Pessoa with ID {id} not found.");
+                var solicitacao = await _solicitacaoService.GetSolicitacaoByIdAsync(id);
+                if (solicitacao == null)
+                    return NotFound($"Solicitacao with ID {id} not found.");
 
-                return Ok(pessoa);
+                return Ok(solicitacao);
             }
             catch (Exception ex)
             {
@@ -48,15 +47,12 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Pessoa>> PostPessoa([FromBody] Pessoa pessoa)
+        public async Task<ActionResult<Solicitacao>> PostSolicitacao([FromBody] Solicitacao solicitacao)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var createdPessoa = await _pessoaService.CreatePessoaAsync(pessoa);
-                return CreatedAtAction(nameof(GetPessoaPorId), new { id = createdPessoa.Id }, createdPessoa);
+                var createdSolicitacao = await _solicitacaoService.CreateSolicitacaoAsync(solicitacao);
+                return CreatedAtAction(nameof(GetSolicitacaoPorId), new { id = createdSolicitacao.Id }, createdSolicitacao);
             }
             catch (Exception ex)
             {
@@ -65,18 +61,15 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Pessoa>> PutPessoa(int id, [FromBody] Pessoa pessoa)
+        public async Task<ActionResult<Solicitacao>> PutSolicitacao(int id, [FromBody] Solicitacao solicitacao)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                if (id != pessoa.Id)
+                if (id != solicitacao.Id)
                     return BadRequest("ID mismatch");
 
-                var updatedPessoa = await _pessoaService.UpdatePessoaAsync(id, pessoa);
-                return Ok(updatedPessoa);
+                var updatedSolicitacao = await _solicitacaoService.UpdateSolicitacaoAsync(id, solicitacao);
+                return Ok(updatedSolicitacao);
             }
             catch (KeyNotFoundException ex)
             {
@@ -89,11 +82,11 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeletePessoa(int id)
+        public async Task<ActionResult> DeleteSolicitacao(int id)
         {
             try
             {
-                await _pessoaService.DeletePessoaAsync(id);
+                await _solicitacaoService.DeleteSolicitacaoAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

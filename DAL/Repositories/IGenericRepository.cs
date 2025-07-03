@@ -12,6 +12,6 @@ namespace DAL.Repositories
         Task<T> UpdateAsync(T entity);
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
-        Task<int> CountAsync(Expression<Func<T, bool>>? expression = null);
+        Task<int> CountAsync(Expression<Func<T, bool>>? expression = null);        
     }
 }

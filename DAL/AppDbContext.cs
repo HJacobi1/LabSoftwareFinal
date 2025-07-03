@@ -21,8 +21,12 @@ namespace DAL
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
+        {            
+            modelBuilder.Entity<PessoaEntidade>()
+                .HasOne(p => p.Laboratorio)
+                .WithMany(l => l.Responsaveis)
+                .HasForeignKey(p => p.LaboratorioId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

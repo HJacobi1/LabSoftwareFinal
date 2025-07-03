@@ -9,11 +9,11 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class LaboratorioController : ControllerBase
     {
-        private readonly LaboratorioService _laboratorioService;
+        private readonly ILaboratorioService _laboratorioService;
 
-        public LaboratorioController(IConfiguration configuration)
+        public LaboratorioController(ILaboratorioService laboratorioService)
         {
-            _laboratorioService = new LaboratorioService(configuration);
+            _laboratorioService = laboratorioService;
         }
 
         [HttpGet]
@@ -21,7 +21,7 @@ namespace API.Controllers
         {
             try
             {
-                var pessoas = await _laboratorioService.GetAllLaboratoriosAsync();
+                var pessoas = await _laboratorioService.GetActiveLaboratoriosAsync();
                 return Ok(pessoas);
             }
             catch (Exception ex)

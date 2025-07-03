@@ -35,6 +35,12 @@ namespace BLL.Services
                 throw new InvalidOperationException("Email já cadastrado.");
             }
 
+            // Exigir PessoaId para usuários não-admins
+            if (!usuario.IsAdmin && (!usuario.PessoaId.HasValue || usuario.PessoaId.Value <= 0))
+            {
+                throw new InvalidOperationException("Usuários não administradores devem estar vinculados a uma pessoa.");
+            }
+
             // Hash da senha antes de salvar
             usuario.Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha);
 
@@ -49,6 +55,12 @@ namespace BLL.Services
             var result = await _usuarioRepository.GetAllAsync();
             // Mapear entidades para modelos de negócio
             return result.Select(MapToBLL);
+        }
+        public async Task<IEnumerable<Usuario>> GetActiveUsersAsync()
+        {
+            var result = await _usuarioRepository.GetAllAsync();
+            // Mapear entidades para modelos de negócio
+            return result.Where(u => !u.IsDeleted).Select(MapToBLL);
         }
 
         public async Task<Usuario?> GetByIdAsync(int id)
@@ -93,7 +105,9 @@ namespace BLL.Services
                 Id = usuario.Id,
                 Email = usuario.Email,
                 Senha = usuario.Senha,
-                IsAdmin = usuario.IsAdmin
+                IsAdmin = usuario.IsAdmin,
+                PessoaId = usuario.PessoaId,
+                LaboratorioId = (!usuario.IsAdmin && usuario.Pessoa != null) ? (int?)usuario.Pessoa.LaboratorioId : null
             };
         }
         private UsuarioEntidade MapToDAL(Usuario usuario)
@@ -103,7 +117,8 @@ namespace BLL.Services
                 Id = usuario.Id,
                 Email = usuario.Email,
                 Senha = usuario.Senha,
-                IsAdmin = usuario.IsAdmin
+                IsAdmin = usuario.IsAdmin,
+                PessoaId = usuario.PessoaId
             };
         }
     }

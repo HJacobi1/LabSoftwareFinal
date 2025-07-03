@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250703175942_LaboratorioPessoaRelation")]
+    partial class LaboratorioPessoaRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,10 +242,6 @@ namespace DAL.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("IdEquipamento")
                         .IsRequired()
                         .HasColumnType("text");
@@ -294,8 +293,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PessoaId")
-                        .IsUnique();
+                    b.HasIndex("PessoaId");
 
                     b.ToTable("Usuarios");
                 });
@@ -337,8 +335,9 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Models.UsuarioEntidade", b =>
                 {
                     b.HasOne("DAL.Models.PessoaEntidade", "Pessoa")
-                        .WithOne("Usuario")
-                        .HasForeignKey("DAL.Models.UsuarioEntidade", "PessoaId");
+                        .WithMany("Usuarios")
+                        .HasForeignKey("PessoaId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Pessoa");
                 });
@@ -352,7 +351,7 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Models.PessoaEntidade", b =>
                 {
-                    b.Navigation("Usuario");
+                    b.Navigation("Usuarios");
                 });
 #pragma warning restore 612, 618
         }

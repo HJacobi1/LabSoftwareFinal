@@ -11,7 +11,10 @@ namespace DAL.Repositories
 
         public async Task<UsuarioEntidade?> GetByEmailAsync(string email)
         {
-            return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
+            return await _dbSet
+                .Include(u => u.Pessoa)
+                .ThenInclude(p => p.Laboratorio)
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -31,6 +34,18 @@ namespace DAL.Repositories
             }
 
             return null;
+        }
+
+        public async Task<List<UsuarioEntidade>> GetByLaboratorioIdAsync(int id)
+        {
+            var usuarios = await GetAllAsync();
+            return usuarios.Where(u => u.Pessoa != null && u.Pessoa.LaboratorioId == id).ToList();
+        }
+
+        public async Task<UsuarioEntidade?> GetByPessoaIdAsync(int id)
+        {
+            var usuarios = await GetAllAsync();
+            return usuarios.Where(u => u.Pessoa != null && u.Pessoa.Id == id).FirstOrDefault();
         }
     }
 } 

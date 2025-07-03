@@ -33,13 +33,17 @@ namespace DAL.Repositories
 
         public virtual async Task<T> AddAsync(T entity)
         {
-            var entry = await _dbSet.AddAsync(entity);
+            entity.CreatedAt = DateTime.UtcNow;
+
+            var entry = await _dbSet.AddAsync(entity);            
             await _context.SaveChangesAsync();
             return entry.Entity;
         }
 
         public virtual async Task<T> UpdateAsync(T entity)
         {
+            entity.UpdatedAt = DateTime.UtcNow;
+
             _dbSet.Update(entity);
             await _context.SaveChangesAsync();
             return entity;

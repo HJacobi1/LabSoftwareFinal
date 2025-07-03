@@ -13,7 +13,8 @@ namespace BLL.Models
         public int Codigo { get; set; }
         public string Endereco { get; set; }
         public string Nome { get; set; }
-        public List<Pessoa> Responsaveis { get; set; }
-        public List<EquipamentoEntidade> Equipamentos { get; set; }
+        public DateTime DataCriacao { get; set; }
+        public List<Pessoa>? Responsaveis { get; set; }
+        public List<EquipamentoLaboratorio>? Equipamentos { get; set; }
     }
 }

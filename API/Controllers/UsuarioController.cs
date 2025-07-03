@@ -59,11 +59,24 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<Usuario>>> GetAllUsuarios()
         {
             try
             {
                 var usuarios = await _usuarioService.GetAllAsync();
+                return Ok(usuarios);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("Ativos")]
+        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuariosAtivos()
+        {
+            try
+            {
+                var usuarios = await _usuarioService.GetActiveUsersAsync();
                 return Ok(usuarios);
             }
             catch (Exception ex)
@@ -106,11 +119,18 @@ namespace API.Controllers
 
         private string GenerateJwtToken(Usuario usuario)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Email, usuario.Email)
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim("isAdmin", usuario.IsAdmin.ToString().ToLower())
             };
+            if (!usuario.IsAdmin && usuario.PessoaId.HasValue)
+            {
+                claims.Add(new Claim("pessoaId", usuario.PessoaId.Value.ToString()));
+                if (usuario.LaboratorioId.HasValue)
+                    claims.Add(new Claim("laboratorioId", usuario.LaboratorioId.Value.ToString()));
+            }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(

@@ -1,10 +1,8 @@
-﻿using DAL.Enums;
-
-namespace DAL.Models
+﻿namespace DAL.Models
 {
     public class MetrologiaEntidade : BaseEntity
     {
-        public ManutencaoCalibracao TipoMC { get; set; }
+        public int TipoMC { get; set; }
         public string CACalibracao { get; set; }
         public string CAVerificacao { get; set; }
         public string CapacidadeMedicao { get; set; }

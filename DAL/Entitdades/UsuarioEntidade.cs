@@ -7,5 +7,7 @@ namespace DAL.Models
         public string Email { get; set; }
         public string Senha { get; set; }
         public bool IsAdmin { get; set; }
+        public int? PessoaId { get; set; }
+        public PessoaEntidade Pessoa { get; set; }
     }
 } 

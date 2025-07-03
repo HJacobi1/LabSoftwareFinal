@@ -9,11 +9,11 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class PessoaController : ControllerBase
     {
-        private readonly PessoaService _pessoaService;
+        private readonly IPessoaService _pessoaService;
 
-        public PessoaController(IConfiguration configuration)
+        public PessoaController(IPessoaService pessoaService)
         {
-            _pessoaService = new PessoaService(configuration);
+            _pessoaService = pessoaService;
         }
 
         [HttpGet]

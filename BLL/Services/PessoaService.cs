@@ -6,20 +6,28 @@ using Microsoft.Extensions.Configuration;
 
 namespace BLL.Services
 {
-    public class PessoaService
+    public class PessoaService : IPessoaService
     {
         private readonly Repository _repository;
         private readonly IGenericRepository<DAL.Models.PessoaEntidade> _pessoaRepository;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        public PessoaService(IConfiguration configuration)
+        public PessoaService(IConfiguration configuration, IUsuarioRepository usuarioRepository)
         {
             _repository = new Repository(configuration);
+            _usuarioRepository = usuarioRepository;
             _pessoaRepository = _repository.GetRepository<DAL.Models.PessoaEntidade>();
         }
 
         public async Task<IEnumerable<Pessoa>> GetAllPessoasAsync()
         {
             var pessoas = await _pessoaRepository.GetAllAsync();
+
+            foreach (var pessoa in pessoas)
+            {
+                pessoa.Usuario = await _usuarioRepository.GetByPessoaIdAsync(pessoa.Id);
+            }
+
             pessoas = pessoas.OrderBy(p => p.Id);
             return pessoas.Select(p => MapToBLL(p));
         }
@@ -27,6 +35,11 @@ namespace BLL.Services
         public async Task<Pessoa?> GetPessoaByIdAsync(int id)
         {
             var pessoa = await _pessoaRepository.GetByIdAsync(id);
+            if (pessoa == null)
+                return null;
+
+            pessoa.Usuario = await _usuarioRepository.GetByPessoaIdAsync(pessoa.Id);
+
             return pessoa != null ? MapToBLL(pessoa) : null;
         }
 
@@ -55,23 +68,26 @@ namespace BLL.Services
             await _pessoaRepository.DeleteAsync(id);
         }
 
-        private static Pessoa MapToBLL(DAL.Models.PessoaEntidade pessoa)
+        public static Pessoa MapToBLL(DAL.Models.PessoaEntidade pessoa)
         {
             return new Pessoa
             {
                 Id = pessoa.Id,
                 Nome = pessoa.Nome,
-                Contato = pessoa.Contato
+                Contato = pessoa.Contato,
+                Email = pessoa.Usuario != null ? pessoa.Usuario.Email : "",
+                LaboratorioId = pessoa.LaboratorioId
             };
         }
 
-        private static DAL.Models.PessoaEntidade MapToDAL(Pessoa pessoa)
+        public static DAL.Models.PessoaEntidade MapToDAL(Pessoa pessoa)
         {
             return new DAL.Models.PessoaEntidade
             {
                 Id = pessoa.Id,
                 Nome = pessoa.Nome,
-                Contato = pessoa.Contato
+                Contato = pessoa.Contato,
+                LaboratorioId = pessoa.LaboratorioId
             };
         }
     }

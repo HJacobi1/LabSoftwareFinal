@@ -19,8 +19,9 @@ import MainMenu from './MainMenu.vue'
 
 .content {
   flex: 1;
-  margin-left: 250px; /* Same as menu width */
+  margin-left: 0px; /* Same as menu width */
   padding: 20px;
   background-color: #f5f5f5;
+  width: 1000px;
 }
 </style> 

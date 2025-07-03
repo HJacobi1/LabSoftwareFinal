@@ -10,21 +10,7 @@
     <!-- Formulário de Cadastro -->
     <div v-if="showForm" class="form-container">
       <form @submit.prevent="salvarEquipamento" class="equipment-form">
-        <div class="form-grid">
-          <!-- Número do Patrimônio -->
-          <div class="form-group">
-            <label for="nroPatrimonio">Número do Patrimônio *</label>
-            <input
-              id="nroPatrimonio"
-              v-model="equipamento.NroPatrimonio"
-              type="text"
-              required
-              placeholder="Digite o número do patrimônio"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Identificação -->
+        <div class="form-grid">          
           <div class="form-group">
             <label for="identificacao">Identificação *</label>
             <input
@@ -32,27 +18,23 @@
               v-model="equipamento.Identificacao"
               type="text"
               required
-              placeholder="Digite a identificação"
               class="form-control"
+              
             />
           </div>
-
-          <!-- Descrição -->
           <div class="form-group full-width">
             <label for="descricao">Descrição *</label>
             <textarea
               id="descricao"
               v-model="equipamento.Descricao"
               required
-              placeholder="Digite a descrição do equipamento"
               class="form-control"
               rows="3"
+              
             ></textarea>
           </div>
-
-          <!-- Tipo Analógico/Digital -->
           <div class="form-group">
-            <label for="tipoAD">Tipo Analógico/Digital *</label>
+            <label for="tipoAD">Tipo *</label>
             <select
               id="tipoAD"
               v-model="equipamento.TipoAD"
@@ -65,8 +47,6 @@
               <option value="NaoAplicavel">Não Aplicável</option>
             </select>
           </div>
-
-          <!-- Marca -->
           <div class="form-group">
             <label for="marca">Marca *</label>
             <input
@@ -74,61 +54,10 @@
               v-model="equipamento.Marca"
               type="text"
               required
-              placeholder="Digite a marca"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Certificado de Calibração -->
-          <div class="form-group">
-            <label for="certificadoCalibracao">Certificado de Calibração</label>
-            <input
-              id="certificadoCalibracao"
-              v-model="equipamento.CertificadoCalibracao"
-              type="text"
-              placeholder="Digite o número do certificado"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Número de Série -->
-          <div class="form-group">
-            <label for="nroSerie">Número de Série</label>
-            <input
-              id="nroSerie"
-              v-model="equipamento.NroSerie"
-              type="text"
-              placeholder="Digite o número de série"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Data de Entrada -->
-          <div class="form-group">
-            <label for="dataEntrada">Data de Entrada *</label>
-            <input
-              id="dataEntrada"
-              v-model="equipamento.DataEntrada"
-              type="date"
-              required
-              class="form-control"
-            />
-          </div>
-
-          <!-- Código do Laboratório -->
-          <div class="form-group">
-            <label for="codLaboratorio">Código do Laboratório *</label>
-            <input
-              id="codLaboratorio"
-              v-model.number="equipamento.CodLaboratorio"
-              type="number"
-              required
-              placeholder="Digite o código do laboratório"
               class="form-control"
             />
           </div>
         </div>
-
         <div class="form-actions">
           <button type="button" @click="limparFormulario" class="btn btn-secondary">
             Limpar
@@ -149,25 +78,23 @@
       <div v-else class="equipment-grid">
         <div
           v-for="equip in equipamentos"
-          :key="equip.Id"
+          :key="equip.id"
           class="equipment-card"
         >
           <div class="card-header">
-            <h4>{{ equip.Identificacao }}</h4>
-            <span class="patrimonio">Patrimônio: {{ equip.NroPatrimonio }}</span>
+            <h4>{{ equip.identificacao }}</h4>
           </div>
           <div class="card-body">
-            <p><strong>Descrição:</strong> {{ equip.Descricao }}</p>
-            <p><strong>Marca:</strong> {{ equip.Marca }}</p>
-            <p><strong>Tipo:</strong> {{ getTipoLabel(equip.TipoAD) }}</p>
-            <p><strong>Laboratório:</strong> {{ equip.CodLaboratorio }}</p>
-            <p><strong>Data de Entrada:</strong> {{ formatDate(equip.DataEntrada) }}</p>
+            <p><strong>Descrição:</strong> {{ equip.descricao }}</p>
+            <p><strong>Marca:</strong> {{ equip.marca }}</p>
+            <p><strong>Tipo:</strong> {{ getTipoLabel(equip.tipoAD) }}</p>
+            <p><strong>Data de Cadastro:</strong> {{ formatDate(equip.createdAt) }}</p>
           </div>
           <div class="card-actions">
             <button @click="editarEquipamento(equip)" class="btn btn-small btn-secondary">
               Editar
             </button>
-            <button @click="excluirEquipamento(equip.Id)" class="btn btn-small btn-danger">
+            <button @click="excluirEquipamento(equip.id)" class="btn btn-small btn-danger">
               Excluir
             </button>
           </div>
@@ -187,31 +114,34 @@ const equipamentos = ref([])
 
 // Modelo do equipamento
 const equipamento = reactive({
-  NroPatrimonio: '',
   Identificacao: '',
   Descricao: '',
   TipoAD: '',
-  Marca: '',
-  CertificadoCalibracao: '',
-  NroSerie: '',
-  DataEntrada: new Date().toISOString().split('T')[0],
-  CodLaboratorio: null
+  Marca: ''
 })
 
+const modelosEquipamento = ref([])
+const modeloSelecionado = ref('')
+
 // Métodos
+const tipoADEnum = {
+  'Analogico': 0,
+  'Digital': 1,
+  'NaoAplicavel': 2
+}
+
 const salvarEquipamento = async () => {
   try {
     loading.value = true
-    
-    // Aqui você faria a chamada para a API
-    const response = await fetch('/api/equipamentos', {
+    // Converter TipoAD para valor numérico do enum
+    const payload = { ...equipamento, TipoAD: tipoADEnum[equipamento.TipoAD] }
+    const response = await fetch('/api/equipamento', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(equipamento)
+      body: JSON.stringify(payload)
     })
-
     if (response.ok) {
       alert('Equipamento salvo com sucesso!')
       limparFormulario()
@@ -229,21 +159,16 @@ const salvarEquipamento = async () => {
 
 const limparFormulario = () => {
   Object.assign(equipamento, {
-    NroPatrimonio: '',
     Identificacao: '',
     Descricao: '',
     TipoAD: '',
-    Marca: '',
-    CertificadoCalibracao: '',
-    NroSerie: '',
-    DataEntrada: new Date().toISOString().split('T')[0],
-    CodLaboratorio: null
+    Marca: ''    
   })
 }
 
 const carregarEquipamentos = async () => {
   try {
-    const response = await fetch('/api/equipamentos')
+    const response = await fetch('/api/equipamento')
     if (response.ok) {
       equipamentos.value = await response.json()
     }
@@ -260,7 +185,7 @@ const editarEquipamento = (equip) => {
 const excluirEquipamento = async (id) => {
   if (confirm('Tem certeza que deseja excluir este equipamento?')) {
     try {
-      const response = await fetch(`/api/equipamentos/${id}`, {
+      const response = await fetch(`/api/equipamento/${id}`, {
         method: 'DELETE'
       })
       

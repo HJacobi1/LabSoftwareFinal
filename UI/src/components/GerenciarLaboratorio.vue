@@ -1,11 +1,14 @@
 <template>
   <div class="gerenciar-laboratorio">
     <div class="header">
-      <h2>Gerenciar Laboratório e Equipamentos</h2>
+      <h2>
+        Gerenciar Laboratório e Equipamentos
+        <span v-if="!isAdmin && laboratorioAtual">- {{ laboratorioAtual.nome }}</span>
+      </h2>
     </div>
 
     <!-- Seletor de Laboratório -->
-    <div class="laboratory-selector">
+    <div class="laboratory-selector" v-if="isAdmin">
       <div class="selector-container">
         <label for="laboratorioSelect">Selecione o Laboratório:</label>
         <select
@@ -18,9 +21,9 @@
           <option
             v-for="lab in laboratorios"
             :key="lab.Id"
-            :value="lab.Id"
+            :value="lab"
           >
-            {{ lab.Codigo }} - {{ lab.Nome }}
+            {{ lab.codigo }} - {{ lab.nome }}
           </option>
         </select>
       </div>
@@ -30,13 +33,13 @@
     <div v-if="laboratorioAtual" class="laboratory-info">
       <div class="info-card">
         <div class="info-header">
-          <h3>{{ laboratorioAtual.Nome }}</h3>
-          <span class="codigo">Código: {{ laboratorioAtual.Codigo }}</span>
+          <h3>{{ laboratorioAtual.nome }}</h3>
+          <span class="codigo">Código: {{ laboratorioAtual.codigo }}</span>
         </div>
         <div class="info-body">
-          <p><strong>Endereço:</strong> {{ laboratorioAtual.Endereco }}</p>
+          <p><strong>Endereço:</strong> {{ laboratorioAtual.endereco }}</p>
           <p><strong>Total de Equipamentos:</strong> {{ equipamentosLaboratorio.length }}</p>
-          <p><strong>Responsáveis:</strong> {{ laboratorioAtual.Responsaveis?.length || 0 }} pessoa(s)</p>
+          <p><strong>Responsáveis:</strong> {{ laboratorioAtual.responsaveis?.length || 0 }} pessoa(s)</p>
         </div>
       </div>
     </div>
@@ -77,8 +80,8 @@
       </div>
 
       <!-- Lista de Equipamentos -->
-       <div>
-      <!-- <div v-if="equipamentosFiltrados.length === 0" class="empty-state">
+       
+      <div v-if="equipamentosFiltrados.length === 0" class="empty-state">
         <p v-if="equipamentosLaboratorio.length === 0">
           Este laboratório não possui equipamentos cadastrados.
         </p>
@@ -87,7 +90,7 @@
         </p>
       </div>
       
-      <div v-else class="equipment-grid"> -->
+      <div v-else class="equipment-grid">
         <div
           v-for="equip in equipamentosFiltrados"
           :key="equip.Id"
@@ -157,24 +160,25 @@
           <form @submit.prevent="salvarEquipamento">
             <div class="form-grid">
               <div class="form-group">
-                <label for="nroPatrimonio">Número do Patrimônio *</label>
-                <input
-                  id="nroPatrimonio"
-                  v-model="equipamentoForm.NroPatrimonio"
-                  type="text"
-                  required
-                  class="form-control"
-                />
+                <label for="modeloEquipamento">Modelo *</label>
+                <select id="modeloEquipamento" v-model="modeloSelecionado" @change="onSelecionarModelo" class="form-control" required>
+                  <option value="">Selecione um modelo</option>
+                  <option v-for="modelo in modelosEquipamento" :key="modelo.id || modelo.Id" :value="modelo.id || modelo.Id">
+                    {{ modelo.identificacao || modelo.Identificacao }} - {{ modelo.marca || modelo.Marca }}
+                  </option>
+                </select>
               </div>
               <div class="form-group">
-                <label for="identificacao">Identificação *</label>
-                <input
-                  id="identificacao"
-                  v-model="equipamentoForm.Identificacao"
-                  type="text"
-                  required
-                  class="form-control"
-                />
+                <label for="nroPatrimonio">Número do Patrimônio *</label>
+                <input id="nroPatrimonio" v-model="equipamentoForm.NroPatrimonio" type="text" required class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="tagIdentificacao">Tag de Identificação</label>
+                <input id="tagIdentificacao" v-model="equipamentoForm.TagIdentificacao" type="text" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="nroSerie">Número de Série</label>
+                <input id="nroSerie" v-model="equipamentoForm.NroSerie" type="text" class="form-control" />
               </div>
               <div class="form-group full-width">
                 <label for="descricao">Descrição *</label>
@@ -184,21 +188,19 @@
                   required
                   class="form-control"
                   rows="3"
+                  readonly
                 ></textarea>
               </div>
               <div class="form-group">
                 <label for="tipoAD">Tipo *</label>
-                <select
+                <input
                   id="tipoAD"
                   v-model="equipamentoForm.TipoAD"
+                  type="text"
                   required
                   class="form-control"
-                >
-                  <option value="">Selecione</option>
-                  <option value="Analogico">Analógico</option>
-                  <option value="Digital">Digital</option>
-                  <option value="NaoAplicavel">Não Aplicável</option>
-                </select>
+                  readonly
+                />
               </div>
               <div class="form-group">
                 <label for="marca">Marca *</label>
@@ -208,35 +210,32 @@
                   type="text"
                   required
                   class="form-control"
+                  readonly
                 />
               </div>
-              <div class="form-group">
-                <label for="nroSerie">Número de Série</label>
-                <input
-                  id="nroSerie"
-                  v-model="equipamentoForm.NroSerie"
-                  type="text"
-                  class="form-control"
-                />
+              <div class="form-group full-width">
+                <label for="caCalibracao">CA Calibração</label>
+                <input id="caCalibracao" v-model="equipamentoForm.DadosMetrologicos.CACalibracao" type="text" class="form-control" />
               </div>
-              <div class="form-group">
-                <label for="certificado">Certificado de Calibração</label>
-                <input
-                  id="certificado"
-                  v-model="equipamentoForm.CertificadoCalibracao"
-                  type="text"
-                  class="form-control"
-                />
+              <div class="form-group full-width">
+                <label for="caVerificacoes">CA Verificações</label>
+                <input id="caVerificacoes" v-model="equipamentoForm.DadosMetrologicos.CAVerificacoes" type="text" class="form-control" />
               </div>
-              <div class="form-group">
-                <label for="dataEntrada">Data de Entrada *</label>
-                <input
-                  id="dataEntrada"
-                  v-model="equipamentoForm.DataEntrada"
-                  type="date"
-                  required
-                  class="form-control"
-                />
+              <div class="form-group full-width">
+                <label for="capacidadeMedicao">Capacidade de Medição</label>
+                <input id="capacidadeMedicao" v-model="equipamentoForm.DadosMetrologicos.CapacidadeMedicao" type="text" class="form-control" />
+              </div>
+              <div class="form-group full-width">
+                <label for="periodiciodadeCalibracao">Periodicidade de Calibração</label>
+                <input id="periodiciodadeCalibracao" v-model="equipamentoForm.DadosMetrologicos.PeriodiciodadeCalibracao" type="text" class="form-control" />
+              </div>
+              <div class="form-group full-width">
+                <label for="periodicidadeVerificacoesIntermediarias">Periodicidade Verificações Intermediárias</label>
+                <input id="periodicidadeVerificacoesIntermediarias" v-model="equipamentoForm.DadosMetrologicos.PeriodicidadeVerificacoesIntermediarias" type="text" class="form-control" />
+              </div>
+              <div class="form-group full-width">
+                <label for="resolucaoDivisaoEscala">Resolução/Divisão de Escala</label>
+                <input id="resolucaoDivisaoEscala" v-model="equipamentoForm.DadosMetrologicos.ResolucaoDivisaoEscala" type="text" class="form-control" />
               </div>
             </div>
             <div class="modal-actions">
@@ -255,79 +254,91 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import Equipamentos from './Equipamentos.vue'
+
+// Função para decodificar o token JWT
+function parseJwt(token) {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+const userPayload = computed(() => {
+  const token = localStorage.getItem('token');
+  return parseJwt(token);
+});
+
+const isAdmin = computed(() => {
+  return userPayload.value && (userPayload.value.isAdmin === true || userPayload.value.isAdmin === 'true');
+});
+
+const userLaboratorioId = computed(() => {
+  return userPayload.value && userPayload.value.laboratorioId ? userPayload.value.laboratorioId : null;
+});
 
 // Estado do componente
 const laboratorios = ref([])
 const laboratorioSelecionado = ref('')
-const laboratorioAtual = {
-  Codigo: 1,
-  Endereco: "Rua de Teste, Nro 1",
-  Nome:"Laboratorio Teste",
-  Responsaveis:[],
-  Equipamentos: [{
-    Id: 1,
-    Identificacao: 1,
-    NroPatrimonio: 12,
-    Marca: "Teste",
-    Descricao: "Teste",
-    TipoAD: 1,
-    NroSerie: "123",
-    CertificadoCalibracao: "ABC123",    
-}]
-}
-//ref(null)
+const laboratorioAtual = ref(null)
 const equipamentosLaboratorio = ref([])
 const filtroBusca = ref('')
 const filtroTipo = ref('')
 const showModal = ref(false)
 const editandoEquipamento = ref(false)
 const loading = ref(false)
+const modelosEquipamento = ref([])
+const modeloSelecionado = ref('')
 
 // Formulário do equipamento
 const equipamentoForm = reactive({
   NroPatrimonio: '',
+  TagIdentificacao: '',
+  NroSerie: '',
   Identificacao: '',
   Descricao: '',
   TipoAD: '',
   Marca: '',
   CertificadoCalibracao: '',
-  NroSerie: '',
-  DataEntrada: new Date().toISOString().split('T')[0],
+  DadosMetrologicos: {
+    CACalibracao: '',
+    CAVerificacoes: '',
+    CapacidadeMedicao: '',
+    PeriodiciodadeCalibracao: '',
+    PeriodicidadeVerificacoesIntermediarias: '',
+    ResolucaoDivisaoEscala: ''
+  },
   CodLaboratorio: null
 })
 
 // Computed properties
-const equipamentosFiltrados = [{
-    Id: 1,
-    Identificacao: "Balança",
-    NroPatrimonio: 12,
-    Marca: "Teste",
-    Descricao: "Teste",
-    TipoAD: 1,
-    NroSerie: "123",
-    CertificadoCalibracao: "ABC123",    
-}]
-// computed(() => {
-//   let filtrados = equipamentosLaboratorio.value
+const equipamentosFiltrados = computed(() => {
+  let filtrados = equipamentosLaboratorio.value
 
-//   if (filtroBusca.value) {
-//     const busca = filtroBusca.value.toLowerCase()
-//     filtrados = filtrados.filter(equip => 
-//       equip.Identificacao.toLowerCase().includes(busca) ||
-//       equip.NroPatrimonio.toLowerCase().includes(busca) ||
-//       equip.Descricao.toLowerCase().includes(busca) ||
-//       equip.Marca.toLowerCase().includes(busca)
-//     )
-//   }
+  if (filtroBusca.value) {
+    const busca = filtroBusca.value.toLowerCase()
+    filtrados = filtrados.filter(equip => 
+      (equip.Identificacao && equip.Identificacao.toLowerCase().includes(busca)) ||
+      (equip.NroPatrimonio && equip.NroPatrimonio.toString().toLowerCase().includes(busca)) ||
+      (equip.Descricao && equip.Descricao.toLowerCase().includes(busca)) ||
+      (equip.Marca && equip.Marca.toLowerCase().includes(busca))
+    )
+  }
 
-//   if (filtroTipo.value) {
-//     filtrados = filtrados.filter(equip => equip.TipoAD === filtroTipo.value)
-//   }
+  if (filtroTipo.value) {
+    filtrados = filtrados.filter(equip => equip.TipoAD === filtroTipo.value)
+  }
 
-//   return filtrados
-// })
+  return filtrados
+})
 
 const estatisticas = computed(() => {
   const stats = {
@@ -365,22 +376,21 @@ const carregarLaboratorios = async () => {
   }
 }
 
-const carregarEquipamentosLaboratorio = async () => {
-  if (!laboratorioSelecionado.value) {
+const carregarEquipamentosLaboratorio = async (labIdParam) => {
+  const labId = labIdParam || (laboratorioSelecionado.value && (laboratorioSelecionado.value.id || laboratorioSelecionado.value.Id || laboratorioSelecionado.value));
+  if (!labId) {
     laboratorioAtual.value = null
     equipamentosLaboratorio.value = []
     return
   }
-
   try {
     // Carregar detalhes do laboratório
-    const labResponse = await fetch(`/api/laboratorios/${laboratorioSelecionado.value}`)
+    const labResponse = await fetch(`/api/laboratorio/${labId}`)
     if (labResponse.ok) {
       laboratorioAtual.value = await labResponse.json()
     }
-
     // Carregar equipamentos do laboratório
-    const equipResponse = await fetch(`/api/laboratorios/${laboratorioSelecionado.value}/equipamentos`)
+    const equipResponse = await fetch(`/api/laboratorio/${labId}/equipamentos`)
     if (equipResponse.ok) {
       equipamentosLaboratorio.value = await equipResponse.json()
     }
@@ -389,11 +399,33 @@ const carregarEquipamentosLaboratorio = async () => {
   }
 }
 
+const carregarModelosEquipamento = async () => {
+  try {
+    const response = await fetch('/api/modeloequipamento')
+    if (response.ok) {
+      modelosEquipamento.value = await response.json()
+    }
+  } catch (error) {
+    console.error('Erro ao carregar modelos de equipamento:', error)
+  }
+}
+
+const onSelecionarModelo = () => {
+  const modelo = modelosEquipamento.value.find(m => m.id === Number(modeloSelecionado.value) || m.Id === Number(modeloSelecionado.value))
+  if (modelo) {
+    equipamentoForm.Descricao = modelo.descricao || modelo.Descricao
+    equipamentoForm.Marca = modelo.marca || modelo.Marca
+    equipamentoForm.TipoAD = modelo.tipoAD || modelo.TipoAD
+    equipamentoForm.Identificacao = modelo.identificacao || modelo.Identificacao
+  }
+}
+
 const adicionarEquipamento = () => {
   editandoEquipamento.value = false
   limparFormulario()
   equipamentoForm.CodLaboratorio = laboratorioSelecionado.value
   showModal.value = true
+  carregarModelosEquipamento()
 }
 
 const editarEquipamento = (equip) => {
@@ -407,8 +439,8 @@ const salvarEquipamento = async () => {
     loading.value = true
     
     const url = editandoEquipamento.value 
-      ? `/api/equipamentos/${equipamentoForm.Id}`
-      : '/api/equipamentos'
+      ? `/api/equipamento/${equipamentoForm.Id}`
+      : '/api/equipamento'
     
     const method = editandoEquipamento.value ? 'PUT' : 'POST'
     
@@ -438,7 +470,7 @@ const salvarEquipamento = async () => {
 const removerEquipamento = async (id) => {
   if (confirm('Tem certeza que deseja remover este equipamento?')) {
     try {
-      const response = await fetch(`/api/equipamentos/${id}`, {
+      const response = await fetch(`/api/equipamento/${id}`, {
         method: 'DELETE'
       })
       
@@ -474,13 +506,21 @@ const fecharModal = () => {
 const limparFormulario = () => {
   Object.assign(equipamentoForm, {
     NroPatrimonio: '',
+    TagIdentificacao: '',
+    NroSerie: '',
     Identificacao: '',
     Descricao: '',
     TipoAD: '',
     Marca: '',
     CertificadoCalibracao: '',
-    NroSerie: '',
-    DataEntrada: new Date().toISOString().split('T')[0],
+    DadosMetrologicos: {
+      CACalibracao: '',
+      CAVerificacoes: '',
+      CapacidadeMedicao: '',
+      PeriodiciodadeCalibracao: '',
+      PeriodicidadeVerificacoesIntermediarias: '',
+      ResolucaoDivisaoEscala: ''
+    },
     CodLaboratorio: laboratorioSelecionado.value
   })
 }
@@ -508,9 +548,22 @@ const formatDate = (date) => {
 }
 
 // Carregar dados ao montar o componente
-onMounted(() => {
-  carregarLaboratorios()
-})
+onMounted(async () => {
+  if (isAdmin.value) {
+    await carregarLaboratorios();
+  } else if (userLaboratorioId.value) {
+    // Carregar apenas o laboratório do usuário
+    laboratorioSelecionado.value = userLaboratorioId.value;
+    await carregarEquipamentosLaboratorio();
+  }
+});
+
+watch(laboratorioSelecionado, (novo) => {
+  if (novo) {
+    const id = novo.id || novo.Id || novo;
+    carregarEquipamentosLaboratorio(id);
+  }
+});
 </script>
 
 <style scoped>

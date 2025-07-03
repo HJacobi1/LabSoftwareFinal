@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BLL.Models;
 using BLL.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace API.Controllers
 {
@@ -9,20 +8,20 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class EquipamentoController : ControllerBase
     {
-        private readonly PessoaService _pessoaService;
+        private readonly IEquipamentoService _equipamentoService;
 
-        public EquipamentoController(IConfiguration configuration)
+        public EquipamentoController(IEquipamentoService equipamentoService)
         {
-            _pessoaService = new PessoaService(configuration);
+            _equipamentoService = equipamentoService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> GetPessoas()
+        public async Task<ActionResult<IEnumerable<ModeloEquipamento>>> GetEquipamentos()
         {
             try
             {
-                var pessoas = await _pessoaService.GetAllPessoasAsync();
-                return Ok(pessoas);
+                var equipamentos = await _equipamentoService.GetActiveEquipamentosAsync();
+                return Ok(equipamentos);
             }
             catch (Exception ex)
             {
@@ -31,15 +30,15 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pessoa>> GetPessoaPorId(int id)
+        public async Task<ActionResult<ModeloEquipamento>> GetEquipamentoPorId(int id)
         {
             try
             {
-                var pessoa = await _pessoaService.GetPessoaByIdAsync(id);
-                if (pessoa == null)
-                    return NotFound($"Pessoa with ID {id} not found.");
+                var equipamento = await _equipamentoService.GetEquipamentoByIdAsync(id);
+                if (equipamento == null)
+                    return NotFound($"Equipamento with ID {id} not found.");
 
-                return Ok(pessoa);
+                return Ok(equipamento);
             }
             catch (Exception ex)
             {
@@ -48,15 +47,12 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Pessoa>> PostPessoa([FromBody] Pessoa pessoa)
+        public async Task<ActionResult<ModeloEquipamento>> PostEquipamento([FromBody] ModeloEquipamento equipamento)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var createdPessoa = await _pessoaService.CreatePessoaAsync(pessoa);
-                return CreatedAtAction(nameof(GetPessoaPorId), new { id = createdPessoa.Id }, createdPessoa);
+                var createdEquipamento = await _equipamentoService.CreateEquipamentoAsync(equipamento);
+                return CreatedAtAction(nameof(GetEquipamentoPorId), new { id = createdEquipamento.Id }, createdEquipamento);
             }
             catch (Exception ex)
             {
@@ -65,18 +61,15 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Pessoa>> PutPessoa(int id, [FromBody] Pessoa pessoa)
+        public async Task<ActionResult<ModeloEquipamento>> PutEquipamento(int id, [FromBody] ModeloEquipamento equipamento)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                if (id != pessoa.Id)
+                if (id != equipamento.Id)
                     return BadRequest("ID mismatch");
 
-                var updatedPessoa = await _pessoaService.UpdatePessoaAsync(id, pessoa);
-                return Ok(updatedPessoa);
+                var updatedEquipamento = await _equipamentoService.UpdateEquipamentoAsync(id, equipamento);
+                return Ok(updatedEquipamento);
             }
             catch (KeyNotFoundException ex)
             {
@@ -89,11 +82,11 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeletePessoa(int id)
+        public async Task<ActionResult> DeleteEquipamento(int id)
         {
             try
             {
-                await _pessoaService.DeletePessoaAsync(id);
+                await _equipamentoService.DeleteEquipamentoAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

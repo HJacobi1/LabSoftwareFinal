@@ -16,7 +16,7 @@
             <label for="codigo">Código *</label>
             <input
               id="codigo"
-              v-model.number="laboratorio.Codigo"
+              v-model.number="laboratorio.codigo"
               type="number"
               required
               placeholder="Digite o código do laboratório"
@@ -29,7 +29,7 @@
             <label for="nome">Nome *</label>
             <input
               id="nome"
-              v-model="laboratorio.Nome"
+              v-model="laboratorio.nome"
               type="text"
               required
               placeholder="Digite o nome do laboratório"
@@ -42,7 +42,7 @@
             <label for="endereco">Endereço *</label>
             <textarea
               id="endereco"
-              v-model="laboratorio.Endereco"
+              v-model="laboratorio.endereco"
               required
               placeholder="Digite o endereço completo do laboratório"
               class="form-control"
@@ -75,20 +75,20 @@
           class="laboratory-card"
         >
           <div class="card-header">
-            <h4>{{ lab.Nome }}</h4>
-            <span class="codigo">Código: {{ lab.Codigo }}</span>
+            <h4>{{ lab.nome }}</h4>
+            <span class="codigo">Código: {{ lab.codigo }}</span>
           </div>
           <div class="card-body">
-            <p><strong>Endereço:</strong> {{ lab.Endereco }}</p>
-            <p><strong>Responsáveis:</strong> {{ lab.Responsaveis?.length || 0 }} pessoa(s)</p>
-            <p><strong>Equipamentos:</strong> {{ lab.Equipamentos?.length || 0 }} equipamento(s)</p>
-            <p><strong>Data de Criação:</strong> {{ formatDate(lab.CreatedAt) }}</p>
+            <p><strong>Endereço:</strong> {{ lab.endereco }}</p>
+            <p><strong>Responsáveis:</strong> {{ lab.responsaveis?.length || 0 }} pessoa(s)</p>
+            <p><strong>Equipamentos:</strong> {{ lab.equipamentos?.length || 0 }} equipamento(s)</p>
+            <p><strong>Data de Criação:</strong> {{ formatDate(lab.dataCriacao) }}</p>
           </div>
           <div class="card-actions">
             <button @click="editarLaboratorio(lab)" class="btn btn-small btn-secondary">
               Editar
             </button>
-            <button @click="excluirLaboratorio(lab.Id)" class="btn btn-small btn-danger">
+            <button @click="excluirLaboratorio(lab.id)" class="btn btn-small btn-danger">
               Excluir
             </button>
           </div>
@@ -108,18 +108,16 @@ const laboratorios = ref([])
 
 // Modelo do laboratório
 const laboratorio = reactive({
-  Codigo: null,
-  Nome: '',
-  Endereco: ''
+  codigo: null,
+  nome: '',
+  endereco: ''
 })
 
 // Métodos
 const salvarLaboratorio = async () => {
   try {
-    loading.value = true
-    
-    // Aqui você faria a chamada para a API
-    const response = await fetch('/api/laboratorios', {
+    loading.value = true     
+    const response = await fetch('/api/Laboratorio', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,15 +142,15 @@ const salvarLaboratorio = async () => {
 
 const limparFormulario = () => {
   Object.assign(laboratorio, {
-    Codigo: null,
-    Nome: '',
-    Endereco: ''
+    codigo: null,
+    nome: '',
+    endereco: ''
   })
 }
 
 const carregarLaboratorios = async () => {
-  try {
-    const response = await fetch('/api/laboratorios')
+  try {    
+    const response = await fetch('/api/laboratorio')
     if (response.ok) {
       laboratorios.value = await response.json()
     }
@@ -169,10 +167,9 @@ const editarLaboratorio = (lab) => {
 const excluirLaboratorio = async (id) => {
   if (confirm('Tem certeza que deseja excluir este laboratório?')) {
     try {
-      const response = await fetch(`/api/laboratorios/${id}`, {
+      const response = await fetch(`/api/laboratorio/${id}`, {
         method: 'DELETE'
       })
-      
       if (response.ok) {
         alert('Laboratório excluído com sucesso!')
         carregarLaboratorios()

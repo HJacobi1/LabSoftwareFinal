@@ -1,16 +1,19 @@
-﻿using System;
+﻿using BLL.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.Models
+namespace BLL.Models
 {
-    public class ModeloEquipamentoEntidade : BaseEntity
+    public class ModeloEquipamento
     {
+        public int Id { get; set; }
         public string Identificacao { get; set; }
         public string Descricao { get; set; }
-        public int TipoAD { get; set; }
+        public AnalogicoDigital TipoAD { get; set; }
         public string Marca { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
