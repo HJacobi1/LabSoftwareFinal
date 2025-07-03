@@ -2,9 +2,14 @@
   <div class="solicitacao">
     <div class="header">
       <h2>Cadastro de Solicitações</h2>
-      <button @click="showForm = !showForm" class="btn-toggle">
-        {{ showForm ? 'Ocultar Formulário' : 'Nova Solicitação' }}
-      </button>
+      <div class="header-actions">
+        <button @click="showForm = !showForm" class="btn-toggle">
+          {{ showForm ? "Ocultar Formulário" : "Nova Solicitação" }}
+        </button>
+        <button @click="irParaCalendario" class="btn btn-primary">
+          <i class="fas fa-calendar"></i> Ver Calendário
+        </button>
+      </div>
     </div>
 
     <!-- Formulário de Cadastro -->
@@ -60,11 +65,15 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" @click="limparFormulario" class="btn btn-secondary">
+          <button
+            type="button"
+            @click="limparFormulario"
+            class="btn btn-secondary"
+          >
             Limpar
           </button>
           <button type="submit" class="btn btn-primary" :disabled="loading">
-            {{ loading ? 'Salvando...' : 'Salvar Solicitação' }}
+            {{ loading ? "Salvando..." : "Salvar Solicitação" }}
           </button>
         </div>
       </form>
@@ -77,11 +86,7 @@
         <p>Nenhuma solicitação cadastrada ainda.</p>
       </div>
       <div v-else class="request-grid">
-        <div
-          v-for="solic in solicitacoes"
-          :key="solic.Id"
-          class="request-card"
-        >
+        <div v-for="solic in solicitacoes" :key="solic.Id" class="request-card">
           <div class="card-header">
             <h4>Solicitação #{{ solic.Id }}</h4>
             <span class="tipo" :class="getTipoClass(solic.TipoMC)">
@@ -90,15 +95,27 @@
           </div>
           <div class="card-body">
             <p><strong>Data:</strong> {{ formatDate(solic.Data) }}</p>
-            <p><strong>Equipamento:</strong> {{ getEquipamentoInfo(solic.IdEquipamento) }}</p>
+            <p>
+              <strong>Equipamento:</strong>
+              {{ getEquipamentoInfo(solic.IdEquipamento) }}
+            </p>
             <p><strong>Status:</strong> {{ getStatusLabel(solic) }}</p>
-            <p><strong>Data de Criação:</strong> {{ formatDate(solic.CreatedAt) }}</p>
+            <p>
+              <strong>Data de Criação:</strong>
+              {{ formatDate(solic.CreatedAt) }}
+            </p>
           </div>
           <div class="card-actions">
-            <button @click="editarSolicitacao(solic)" class="btn btn-small btn-secondary">
+            <button
+              @click="editarSolicitacao(solic)"
+              class="btn btn-small btn-secondary"
+            >
               Editar
             </button>
-            <button @click="excluirSolicitacao(solic.Id)" class="btn btn-small btn-danger">
+            <button
+              @click="excluirSolicitacao(solic.Id)"
+              class="btn btn-small btn-danger"
+            >
               Excluir
             </button>
           </div>
@@ -109,7 +126,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted } from "vue"
+import { useRouter } from "vue-router"
+
+const router = useRouter()
 
 // Estado do componente
 const showForm = ref(false)
@@ -119,35 +139,35 @@ const equipamentos = ref([])
 
 // Modelo da solicitação
 const solicitacao = reactive({
-  Data: new Date().toISOString().split('T')[0],
-  TipoMC: '',
-  IdEquipamento: ''
+  Data: new Date().toISOString().split("T")[0],
+  TipoMC: "",
+  IdEquipamento: "",
 })
 
 // Métodos
 const salvarSolicitacao = async () => {
   try {
     loading.value = true
-    
+
     // Aqui você faria a chamada para a API
-    const response = await fetch('/api/solicitacoes', {
-      method: 'POST',
+    const response = await fetch("/api/solicitacao", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(solicitacao)
+      body: JSON.stringify(solicitacao),
     })
 
     if (response.ok) {
-      alert('Solicitação salva com sucesso!')
+      alert("Solicitação salva com sucesso!")
       limparFormulario()
       carregarSolicitacoes()
     } else {
-      alert('Erro ao salvar solicitação')
+      alert("Erro ao salvar solicitação")
     }
   } catch (error) {
-    console.error('Erro:', error)
-    alert('Erro ao salvar solicitação')
+    console.error("Erro:", error)
+    alert("Erro ao salvar solicitação")
   } finally {
     loading.value = false
   }
@@ -155,31 +175,31 @@ const salvarSolicitacao = async () => {
 
 const limparFormulario = () => {
   Object.assign(solicitacao, {
-    Data: new Date().toISOString().split('T')[0],
-    TipoMC: '',
-    IdEquipamento: ''
+    Data: new Date().toISOString().split("T")[0],
+    TipoMC: "",
+    IdEquipamento: "",
   })
 }
 
 const carregarSolicitacoes = async () => {
   try {
-    const response = await fetch('/api/solicitacoes')
+    const response = await fetch("/api/solicitacao")
     if (response.ok) {
       solicitacoes.value = await response.json()
     }
   } catch (error) {
-    console.error('Erro ao carregar solicitações:', error)
+    console.error("Erro ao carregar solicitações:", error)
   }
 }
 
 const carregarEquipamentos = async () => {
   try {
-    const response = await fetch('/api/equipamentos')
+    const response = await fetch("/api/equipamento")
     if (response.ok) {
       equipamentos.value = await response.json()
     }
   } catch (error) {
-    console.error('Erro ao carregar equipamentos:', error)
+    console.error("Erro ao carregar equipamentos:", error)
   }
 }
 
@@ -189,54 +209,60 @@ const editarSolicitacao = (solic) => {
 }
 
 const excluirSolicitacao = async (id) => {
-  if (confirm('Tem certeza que deseja excluir esta solicitação?')) {
+  if (confirm("Tem certeza que deseja excluir esta solicitação?")) {
     try {
-      const response = await fetch(`/api/solicitacoes/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/solicitacao/${id}`, {
+        method: "DELETE",
       })
-      
+
       if (response.ok) {
-        alert('Solicitação excluída com sucesso!')
+        alert("Solicitação excluída com sucesso!")
         carregarSolicitacoes()
       } else {
-        alert('Erro ao excluir solicitação')
+        alert("Erro ao excluir solicitação")
       }
     } catch (error) {
-      console.error('Erro:', error)
-      alert('Erro ao excluir solicitação')
+      console.error("Erro:", error)
+      alert("Erro ao excluir solicitação")
     }
   }
 }
 
 const getTipoLabel = (tipo) => {
   const labels = {
-    'Calibracao': 'Calibração',
-    'Manutencao': 'Manutenção'
+    Calibracao: "Calibração",
+    Manutencao: "Manutenção",
   }
   return labels[tipo] || tipo
 }
 
 const getTipoClass = (tipo) => {
   const classes = {
-    'Calibracao': 'tipo-calibracao',
-    'Manutencao': 'tipo-manutencao'
+    Calibracao: "tipo-calibracao",
+    Manutencao: "tipo-manutencao",
   }
-  return classes[tipo] || ''
+  return classes[tipo] || ""
 }
 
 const getEquipamentoInfo = (idEquipamento) => {
-  const equip = equipamentos.value.find(e => e.Id === idEquipamento)
-  return equip ? `${equip.Identificacao} (${equip.NroPatrimonio})` : 'Equipamento não encontrado'
+  const equip = equipamentos.value.find((e) => e.Id === idEquipamento)
+  return equip
+    ? `${equip.Identificacao} (${equip.NroPatrimonio})`
+    : "Equipamento não encontrado"
 }
 
 const getStatusLabel = (solicitacao) => {
   // Aqui você pode implementar lógica de status baseada em outros campos
   // Por enquanto, vamos usar um status básico
-  return 'Pendente'
+  return "Pendente"
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('pt-BR')
+  return new Date(date).toLocaleDateString("pt-BR")
+}
+
+const irParaCalendario = () => {
+  router.push("/calendario")
 }
 
 // Carregar dados ao montar o componente
@@ -262,6 +288,12 @@ onMounted(() => {
   border-bottom: 2px solid #e0e0e0;
 }
 
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
 .btn-toggle {
   background-color: #fd7e14;
   color: white;
@@ -282,7 +314,7 @@ onMounted(() => {
   padding: 30px;
   border-radius: 10px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .request-form {
@@ -318,7 +350,7 @@ onMounted(() => {
 .form-control:focus {
   outline: none;
   border-color: #fd7e14;
-  box-shadow: 0 0 0 3px rgba(253,126,20,0.1);
+  box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.1);
 }
 
 .form-control::placeholder {
@@ -401,13 +433,13 @@ onMounted(() => {
   background-color: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .request-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
@@ -465,25 +497,25 @@ onMounted(() => {
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .request-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .header {
     flex-direction: column;
     gap: 15px;
     text-align: center;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 }
-</style> 
+</style>

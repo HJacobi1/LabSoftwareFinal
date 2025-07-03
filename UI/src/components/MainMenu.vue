@@ -3,7 +3,7 @@
     <div class="menu-header">
       <img src="../assets/lab-96.png" alt="Lab Icon" class="lab-icon" />
       <h1>LabManager</h1>
-    </div>    
+    </div>
     <nav class="menu-nav">
       <router-link v-if="isAdmin" to="/laboratorios" class="menu-item">
         <i class="fas fa-flask"></i>
@@ -21,8 +21,22 @@
         <i class="fas fa-cogs"></i>
         <span>Gerenciador de Laboratório</span>
       </router-link>
-      <router-link v-if="isAdmin" to="/usuarios">Usuários</router-link>
-      <button @click="logout">Sair</button>
+      <router-link to="/solicitacoes" class="menu-item">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Solicitações</span>
+      </router-link>
+      <router-link to="/calendario" class="menu-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendário</span>
+      </router-link>
+      <router-link v-if="isAdmin" to="/usuarios" class="menu-item">
+        <i class="fas fa-user-cog"></i>
+        <span>Usuários</span>
+      </router-link>
+      <button @click="logout" class="menu-item logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sair</span>
+      </button>
       <div class="user-info">
         <span v-if="userEmail">Usuário Logado: {{ userEmail }}</span>
       </div>
@@ -31,49 +45,64 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from "vue"
+import { useRouter } from "vue-router"
 
-const router = useRouter();
+const router = useRouter()
 
 const logout = () => {
-  localStorage.removeItem('token');
-  router.push('/login');
-};
+  localStorage.removeItem("token")
+  router.push("/login")
+}
 
 function parseJwt(token) {
-  if (!token) return null;
+  if (!token) return null
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
+    const base64Url = token.split(".")[1]
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+        })
+        .join("")
+    )
+    return JSON.parse(jsonPayload)
   } catch (e) {
-    return null;
+    return null
   }
 }
 
 const userPayload = computed(() => {
-  const token = localStorage.getItem('token');
-  return parseJwt(token);
-});
+  const token = localStorage.getItem("token")
+  return parseJwt(token)
+})
 
 const isAdmin = computed(() => {
-  return userPayload.value && (userPayload.value.isAdmin === true || userPayload.value.isAdmin === 'true');
-});
+  return (
+    userPayload.value &&
+    (userPayload.value.isAdmin === true || userPayload.value.isAdmin === "true")
+  )
+})
 
-const userEmail = computed(() => {  
-  console.log(userPayload.value["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]);
-  const email = userPayload.value["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
-  return email;
-});
+const userEmail = computed(() => {
+  console.log(
+    userPayload.value[
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+    ]
+  )
+  const email =
+    userPayload.value[
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+    ]
+  return email
+})
 </script>
 
 <style scoped>
 /* Add Font Awesome for icons */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
 .main-menu {
   width: 250px;
   height: 100vh;
@@ -147,6 +176,18 @@ const userEmail = computed(() => {
   text-align: center;
 }
 
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #e74c3c;
+}
+
 .user-info {
   width: 100%;
   padding: 18px 20px 18px 20px;
@@ -155,4 +196,4 @@ const userEmail = computed(() => {
   background: none;
   text-align: left;
 }
-</style> 
+</style>

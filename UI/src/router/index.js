@@ -1,88 +1,100 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import AppLayout from '../components/AppLayout.vue'
-import Pessoa from '../components/Pessoa.vue'
-import Equipamentos from '../components/Equipamentos.vue'
-import Laboratorio from '../components/Laboratorio.vue'
-import Usuarios from '../components/Usuarios.vue'
-import GerenciadorLaboratorio from '../components/GerenciarLaboratorio.vue'
-import Login from '../components/Login.vue'
+import { createRouter, createWebHistory } from "vue-router"
+import AppLayout from "../components/AppLayout.vue"
+import Pessoa from "../components/Pessoa.vue"
+import Equipamentos from "../components/Equipamentos.vue"
+import Laboratorio from "../components/Laboratorio.vue"
+import Usuarios from "../components/Usuarios.vue"
+import GerenciadorLaboratorio from "../components/GerenciarLaboratorio.vue"
+import Solicitacao from "../components/Solicitacao.vue"
+import Calendario from "../components/Calendario.vue"
+import Login from "../components/Login.vue"
 
 const routes = [
   {
-    path: '/',
+    path: "/",
     component: AppLayout,
     children: [
       {
-        path: 'pessoas',
-        name: 'pessoas',
-        component: Pessoa
+        path: "pessoas",
+        name: "pessoas",
+        component: Pessoa,
       },
       {
-        path: 'equipamentos',
-        name: 'equipamentos',
-        component: Equipamentos
+        path: "equipamentos",
+        name: "equipamentos",
+        component: Equipamentos,
       },
       {
-        path: 'laboratorios',
-        name: 'laboratorios',
-        component: Laboratorio
+        path: "laboratorios",
+        name: "laboratorios",
+        component: Laboratorio,
       },
       {
-        path: 'gerenciador-laboratorio',
-        name: 'gerenciador-laboratorio',
-        component: GerenciadorLaboratorio
+        path: "gerenciador-laboratorio",
+        name: "gerenciador-laboratorio",
+        component: GerenciadorLaboratorio,
       },
       {
-        path: 'usuarios',
-        name: 'usuarios',
-        component: Usuarios
+        path: "usuarios",
+        name: "usuarios",
+        component: Usuarios,
       },
       {
-        path: '',
-        redirect: '/pessoas'
-      }
-    ]
+        path: "solicitacoes",
+        name: "solicitacoes",
+        component: Solicitacao,
+      },
+      {
+        path: "calendario",
+        name: "calendario",
+        component: Calendario,
+      },
+      {
+        path: "",
+        redirect: "/pessoas",
+      },
+    ],
   },
-  { path: '/login', component: Login }
+  { path: "/login", component: Login },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('token');
+  const publicPages = ["/login"]
+  const authRequired = !publicPages.includes(to.path)
+  const loggedIn = localStorage.getItem("token")
 
   if (authRequired && !loggedIn) {
-    return next('/login');
+    return next("/login")
   }
 
   // Rotas restritas para admin
-  const adminRoutes = ['pessoas', 'equipamentos', 'laboratorios', 'usuarios'];
+  const adminRoutes = ["pessoas", "equipamentos", "laboratorios", "usuarios"]
   if (adminRoutes.includes(to.name)) {
-    const token = localStorage.getItem('token');
-    if (!token) return next('/login');
+    const token = localStorage.getItem("token")
+    if (!token) return next("/login")
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (!payload.isAdmin || payload.isAdmin === 'false') {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      if (!payload.isAdmin || payload.isAdmin === "false") {
         // Se não for admin, redireciona para gerenciador-laboratorio
-        return next({ name: 'gerenciador-laboratorio' });
+        return next({ name: "gerenciador-laboratorio" })
       }
     } catch (e) {
-      return next('/login');
+      return next("/login")
     }
   }
 
   // Usuários não admins só podem acessar gerenciador-laboratorio
-  if (to.name === 'gerenciador-laboratorio') {
+  if (to.name === "gerenciador-laboratorio") {
     // Qualquer usuário autenticado pode acessar
-    return next();
+    return next()
   }
 
-  next();
-});
+  next()
+})
 
-export default router 
+export default router
