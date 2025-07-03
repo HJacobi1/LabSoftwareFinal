@@ -2,7 +2,7 @@
 
 namespace DAL.Models
 {
-    public class Metrologia : BaseEntity
+    public class MetrologiaEntidade : BaseEntity
     {
         public ManutencaoCalibracao TipoMC { get; set; }
         public string CACalibracao { get; set; }

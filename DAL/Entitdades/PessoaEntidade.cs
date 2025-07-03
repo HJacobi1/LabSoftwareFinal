@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace DAL.Models;
 
-public partial class Pessoa : BaseEntity
+public partial class PessoaEntidade : BaseEntity
 {
     public string Nome { get; set; }
 

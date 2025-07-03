@@ -14,6 +14,6 @@ namespace BLL.Models
         public string Endereco { get; set; }
         public string Nome { get; set; }
         public List<Pessoa> Responsaveis { get; set; }
-        public List<Equipamento> Equipamentos { get; set; }
+        public List<EquipamentoEntidade> Equipamentos { get; set; }
     }
 }

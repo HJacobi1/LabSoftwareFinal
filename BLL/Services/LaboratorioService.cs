@@ -9,12 +9,12 @@ namespace BLL.Services
     public class LaboratorioService
     {
         private readonly Repository _repository;
-        private readonly IGenericRepository<DAL.Models.Laboratorio> _laboratorioRepository;
+        private readonly IGenericRepository<DAL.Models.LaboratorioEntidade> _laboratorioRepository;
 
         public LaboratorioService(IConfiguration configuration)
         {
             _repository = new Repository(configuration);
-            _laboratorioRepository = _repository.GetRepository<DAL.Models.Laboratorio>();
+            _laboratorioRepository = _repository.GetRepository<DAL.Models.LaboratorioEntidade>();
         }
 
         public async Task<IEnumerable<Laboratorio>> GetAllLaboratoriosAsync()
@@ -55,7 +55,7 @@ namespace BLL.Services
             await _laboratorioRepository.DeleteAsync(id);
         }
 
-        private static Laboratorio MapToBLL(DAL.Models.Laboratorio Laboratorio)
+        private static Laboratorio MapToBLL(DAL.Models.LaboratorioEntidade Laboratorio)
         {
             return new Laboratorio
             {
@@ -65,9 +65,9 @@ namespace BLL.Services
             };
         }
 
-        private static DAL.Models.Laboratorio MapToDAL(Laboratorio Laboratorio)
+        private static DAL.Models.LaboratorioEntidade MapToDAL(Laboratorio Laboratorio)
         {
-            return new DAL.Models.Laboratorio
+            return new DAL.Models.LaboratorioEntidade
             {
                 Id = Laboratorio.Id,
                 Nome = Laboratorio.Nome,

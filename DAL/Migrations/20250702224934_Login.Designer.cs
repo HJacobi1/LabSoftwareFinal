@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250626233229_Modelos")]
-    partial class Modelos
+    [Migration("20250702224934_Login")]
+    partial class Login
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,23 +46,17 @@ namespace DAL.Migrations
                     b.Property<DateTime>("DataEntrada")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Identificacao")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<int?>("LaboratorioId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Marca")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("MetricaId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModeloId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("NroPatrimonio")
                         .IsRequired()
@@ -72,15 +66,16 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TipoAD")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LaboratorioId");
+
+                    b.HasIndex("MetricaId");
+
+                    b.HasIndex("ModeloId");
 
                     b.ToTable("Equipamentos");
                 });
@@ -145,9 +140,6 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("EquipamentoId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -163,9 +155,44 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EquipamentoId");
-
                     b.ToTable("Metrologia");
+                });
+
+            modelBuilder.Entity("DAL.Models.ModeloEquipamento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Identificacao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Marca")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TipoAD")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ModeloEquipamento");
                 });
 
             modelBuilder.Entity("DAL.Models.Pessoa", b =>
@@ -233,18 +260,51 @@ namespace DAL.Migrations
                     b.ToTable("Solicitacoes");
                 });
 
+            modelBuilder.Entity("DAL.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
+                });
+
             modelBuilder.Entity("DAL.Models.Equipamento", b =>
                 {
                     b.HasOne("DAL.Models.Laboratorio", null)
                         .WithMany("Equipamentos")
                         .HasForeignKey("LaboratorioId");
-                });
 
-            modelBuilder.Entity("DAL.Models.Metrologia", b =>
-                {
-                    b.HasOne("DAL.Models.Equipamento", null)
-                        .WithMany("Metricas")
-                        .HasForeignKey("EquipamentoId");
+                    b.HasOne("DAL.Models.Metrologia", "Metrica")
+                        .WithMany()
+                        .HasForeignKey("MetricaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Models.ModeloEquipamento", "Modelo")
+                        .WithMany()
+                        .HasForeignKey("ModeloId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Metrica");
+
+                    b.Navigation("Modelo");
                 });
 
             modelBuilder.Entity("DAL.Models.Pessoa", b =>
@@ -252,11 +312,6 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Models.Laboratorio", null)
                         .WithMany("Responsaveis")
                         .HasForeignKey("LaboratorioId");
-                });
-
-            modelBuilder.Entity("DAL.Models.Equipamento", b =>
-                {
-                    b.Navigation("Metricas");
                 });
 
             modelBuilder.Entity("DAL.Models.Laboratorio", b =>

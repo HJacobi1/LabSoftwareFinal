@@ -9,12 +9,12 @@ namespace BLL.Services
     public class PessoaService
     {
         private readonly Repository _repository;
-        private readonly IGenericRepository<DAL.Models.Pessoa> _pessoaRepository;
+        private readonly IGenericRepository<DAL.Models.PessoaEntidade> _pessoaRepository;
 
         public PessoaService(IConfiguration configuration)
         {
             _repository = new Repository(configuration);
-            _pessoaRepository = _repository.GetRepository<DAL.Models.Pessoa>();
+            _pessoaRepository = _repository.GetRepository<DAL.Models.PessoaEntidade>();
         }
 
         public async Task<IEnumerable<Pessoa>> GetAllPessoasAsync()
@@ -55,7 +55,7 @@ namespace BLL.Services
             await _pessoaRepository.DeleteAsync(id);
         }
 
-        private static Pessoa MapToBLL(DAL.Models.Pessoa pessoa)
+        private static Pessoa MapToBLL(DAL.Models.PessoaEntidade pessoa)
         {
             return new Pessoa
             {
@@ -65,9 +65,9 @@ namespace BLL.Services
             };
         }
 
-        private static DAL.Models.Pessoa MapToDAL(Pessoa pessoa)
+        private static DAL.Models.PessoaEntidade MapToDAL(Pessoa pessoa)
         {
-            return new DAL.Models.Pessoa
+            return new DAL.Models.PessoaEntidade
             {
                 Id = pessoa.Id,
                 Nome = pessoa.Nome,

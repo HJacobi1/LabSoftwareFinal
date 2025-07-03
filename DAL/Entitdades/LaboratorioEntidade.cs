@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace DAL.Models;
 
-public partial class Laboratorio : BaseEntity
+public partial class LaboratorioEntidade : BaseEntity
 {
     public int Codigo { get; set; }
     public string Endereco { get; set; }
     public string Nome { get; set; }
-    public List<Pessoa> Responsaveis { get; set; }
-    public List<Equipamento> Equipamentos { get; set; }
+    public List<PessoaEntidade> Responsaveis { get; set; }
+    public List<EquipamentoEntidade> Equipamentos { get; set; }
 }

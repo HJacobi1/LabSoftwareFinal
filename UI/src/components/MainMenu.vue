@@ -17,21 +17,29 @@
       <router-link to="/laboratorios" class="menu-item">
         <i class="fas fa-flask"></i>
         <span>Laboratórios</span>
-      </router-link>
-      <router-link to="/solicitacoes" class="menu-item">
-        <i class="fas fa-clipboard-list"></i>
-        <span>Solicitações</span>
-      </router-link>
-      <router-link to="/gerenciar-laboratorio" class="menu-item">
+      </router-link>    
+      <router-link to="/gerenciador-laboratorio" class="menu-item">
         <i class="fas fa-cogs"></i>
-        <span>Gerenciar Laboratório</span>
-      </router-link>      
+        <span>Gerenciador de Laboratório</span>
+      </router-link>
+      <router-link to="/usuarios">Usuários</router-link>
+      <button @click="logout">Sair</button>
+      
     </nav>
   </div>
 </template>
 
 <script setup>
-// Component logic can be added here if needed
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const logout = () => {
+  localStorage.removeItem('token');
+  router.push('/login');
+};
+
 </script>
 
 <style scoped>

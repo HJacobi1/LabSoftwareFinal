@@ -14,4 +14,4 @@ namespace DAL.Repositories
         Task<bool> ExistsAsync(int id);
         Task<int> CountAsync(Expression<Func<T, bool>>? expression = null);
     }
-} 
+}

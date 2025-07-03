@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace DAL.Models;
 
-public partial class Solicitacao : BaseEntity
+public partial class SolicitacaoEntidade : BaseEntity
 {
     public DateTime Data { get; set; }
     public ManutencaoCalibracao TipoMC { get; set; }

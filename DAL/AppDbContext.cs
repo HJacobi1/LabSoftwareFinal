@@ -12,10 +12,11 @@ namespace DAL
 {
     public class AppDbContext : DbContext
     {        
-        public DbSet<Pessoa> Pessoas { get; set; }
-        public DbSet<Laboratorio> Laboratorios { get; set; }
-        public DbSet<Equipamento> Equipamentos { get; set; }
-        public DbSet<Solicitacao> Solicitacoes { get; set; }
+        public DbSet<PessoaEntidade> Pessoas { get; set; }
+        public DbSet<LaboratorioEntidade> Laboratorios { get; set; }
+        public DbSet<EquipamentoEntidade> Equipamentos { get; set; }
+        public DbSet<SolicitacaoEntidade> Solicitacoes { get; set; }
+        public DbSet<UsuarioEntidade> Usuarios { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

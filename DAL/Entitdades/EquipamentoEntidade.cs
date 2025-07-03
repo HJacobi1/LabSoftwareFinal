@@ -5,13 +5,13 @@ using System.Diagnostics;
 
 namespace DAL.Models;
 
-public partial class Equipamento : BaseEntity
+public partial class EquipamentoEntidade : BaseEntity
 {
-    public ModeloEquipamento Modelo { get; set; }
+    public ModeloEquipamentoEntidade Modelo { get; set; }
     public string NroPatrimonio { get; set; }      
     public string CertificadoCalibracao { get; set; }
     public string NroSerie { get; set; }
     public DateTime DataEntrada { get; set; }
     public int CodLaboratorio { get; set; }
-    public Metrologia Metrica { get; set; } 
+    public MetrologiaEntidade Metrica { get; set; } 
 }
