@@ -6,6 +6,8 @@ import Laboratorio from '../components/Laboratorio.vue'
 import Usuarios from '../components/Usuarios.vue'
 import GerenciadorLaboratorio from '../components/GerenciarLaboratorio.vue'
 import Login from '../components/Login.vue'
+import Solicitacao from '../components/Solicitacao.vue'
+import Calendario from '../components/Calendario.vue'
 
 const routes = [
   {
@@ -33,13 +35,23 @@ const routes = [
         component: GerenciadorLaboratorio
       },
       {
+        path: 'solicitacoes',
+        name: 'solicitacoes',
+        component: Solicitacao
+      },
+      {
+        path: 'calendario',
+        name: 'calendario',
+        component: Calendario
+      },
+      {
         path: 'usuarios',
         name: 'usuarios',
         component: Usuarios
       },
       {
         path: '',
-        redirect: '/pessoas'
+        redirect: '/gerenciador-laboratorio'
       }
     ]
   },

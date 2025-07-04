@@ -21,8 +21,22 @@
         <i class="fas fa-cogs"></i>
         <span>Gerenciador de Laboratório</span>
       </router-link>
-      <router-link v-if="isAdmin" to="/usuarios">Usuários</router-link>
-      <button @click="logout">Sair</button>
+      <router-link to="/solicitacoes" class="menu-item">
+        <i class="fas fa-calendar"></i>
+        <span>Solicitações</span>
+      </router-link>
+      <router-link to="/calendario" class="menu-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendário</span>
+      </router-link>      
+      <router-link v-if="isAdmin" to="/usuarios" class="menu-item">
+        <i class="fas fa-user-cog"></i>
+        <span>Usuários</span>
+      </router-link>
+      <button @click="logout" class="menu-item logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sair</span>
+      </button>
       <div class="user-info">
         <span v-if="userEmail">Usuário Logado: {{ userEmail }}</span>
       </div>
@@ -145,6 +159,18 @@ const userEmail = computed(() => {
 .menu-item i {
   width: 20px;
   text-align: center;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  background-color: #e74c3c;
 }
 
 .user-info {

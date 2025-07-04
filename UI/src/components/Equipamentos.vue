@@ -208,6 +208,7 @@ const getTipoLabel = (tipo) => {
     'Digital': 'Digital',
     'NaoAplicavel': 'Não Aplicável'
   }
+  console.log(tipo)
   return labels[tipo] || tipo
 }
 

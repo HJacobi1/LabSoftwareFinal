@@ -22,6 +22,6 @@ import MainMenu from './MainMenu.vue'
   margin-left: 0px; /* Same as menu width */
   padding: 20px;
   background-color: #f5f5f5;
-  width: 1000px;
+  width: 600px;
 }
 </style> 

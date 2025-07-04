@@ -1,7 +1,7 @@
 <template>
   <div class="solicitacao">
     <div class="header">
-      <h2>Cadastro de Solicitações</h2>
+      <h2>Cadastro de Eventos</h2>
       <button @click="showForm = !showForm" class="btn-toggle">
         {{ showForm ? 'Ocultar Formulário' : 'Nova Solicitação' }}
       </button>
