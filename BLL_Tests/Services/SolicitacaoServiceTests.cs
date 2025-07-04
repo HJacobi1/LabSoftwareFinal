@@ -36,26 +36,29 @@ namespace Tests.BLL.Services
         {
             var solicitacoes = new List<SolicitacaoEntidade>
             {
-                new SolicitacaoEntidade { Id = 1, Descricao = "Solicitação 1" },
-                new SolicitacaoEntidade { Id = 2, Descricao = "Solicitação 2" }
+                new SolicitacaoEntidade { Id = 1, Descricao = "Solicitação 1", IdEquipamento = "EQ001" },
+                new SolicitacaoEntidade { Id = 2, Descricao = "Solicitação 2", IdEquipamento = "EQ002" }
             };
             _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(solicitacoes);
 
             var result = await _service.GetAllSolicitacoesAsync();
 
             Assert.Equal(2, result.Count());
+            Assert.Equal("EQ001", result.First().IdEquipamento);
+            Assert.Equal("EQ002", result.Last().IdEquipamento);
         }
 
         [Fact]
         public async Task GetSolicitacaoByIdAsync_ReturnsCorrect()
         {
-            var solicitacao = new SolicitacaoEntidade { Id = 1, Descricao = "Solicitação" };
+            var solicitacao = new SolicitacaoEntidade { Id = 1, Descricao = "Solicitação", IdEquipamento = "EQ001" };
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(solicitacao);
 
             var result = await _service.GetSolicitacaoByIdAsync(1);
 
             Assert.NotNull(result);
             Assert.Equal("Solicitação", result.Descricao);
+            Assert.Equal("EQ001", result.IdEquipamento);
         }
 
         [Fact]
@@ -66,7 +69,8 @@ namespace Tests.BLL.Services
                 Id = 0,
                 Descricao = "Nova",
                 Data = DateTime.Today,
-                TipoMC = ManutencaoCalibracao.Manutencao
+                TipoMC = ManutencaoCalibracao.Manutencao,
+                IdEquipamento = "EQ001"
             };
 
             var created = new SolicitacaoEntidade
@@ -74,7 +78,8 @@ namespace Tests.BLL.Services
                 Id = 1,
                 Descricao = "Nova",
                 Data = DateTime.Today,
-                TipoMC = (int)ManutencaoCalibracao.Manutencao
+                TipoMC = (int)ManutencaoCalibracao.Manutencao,
+                IdEquipamento = "EQ001"
             };
 
             _mockRepo.Setup(r => r.AddAsync(It.IsAny<SolicitacaoEntidade>())).ReturnsAsync(created);
@@ -83,6 +88,7 @@ namespace Tests.BLL.Services
 
             Assert.Equal(1, result.Id);
             Assert.Equal("Nova", result.Descricao);
+            Assert.Equal("EQ001", result.IdEquipamento);
         }
 
         [Fact]
@@ -93,7 +99,8 @@ namespace Tests.BLL.Services
                 Id = 1,
                 Descricao = "Antiga",
                 Data = DateTime.Today.AddDays(-1),
-                TipoMC = (int)ManutencaoCalibracao.Calibracao
+                TipoMC = (int)ManutencaoCalibracao.Calibracao,
+                IdEquipamento = "EQ001"
             };
 
             var updated = new SolicitacaoEntidade
@@ -101,7 +108,8 @@ namespace Tests.BLL.Services
                 Id = 1,
                 Descricao = "Atualizada",
                 Data = DateTime.Today,
-                TipoMC = (int)ManutencaoCalibracao.Manutencao
+                TipoMC = (int)ManutencaoCalibracao.Manutencao,
+                IdEquipamento = "EQ002"
             };
 
             var input = new Solicitacao
@@ -109,7 +117,8 @@ namespace Tests.BLL.Services
                 Id = 1,
                 Descricao = "Atualizada",
                 Data = DateTime.Today,
-                TipoMC = ManutencaoCalibracao.Manutencao
+                TipoMC = ManutencaoCalibracao.Manutencao,
+                IdEquipamento = "EQ002"
             };
 
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
@@ -119,6 +128,7 @@ namespace Tests.BLL.Services
 
             Assert.Equal("Atualizada", result.Descricao);
             Assert.Equal(DateTime.Today, result.Data);
+            Assert.Equal("EQ002", result.IdEquipamento);
         }
 
         [Fact]
@@ -129,6 +139,28 @@ namespace Tests.BLL.Services
             await _service.DeleteSolicitacaoAsync(1);
 
             _mockRepo.Verify(r => r.DeleteAsync(1), Times.Once);
+        }
+
+        [Fact]
+        public async Task MapeamentoIdEquipamento_IsCorrect()
+        {
+            // Teste específico para validar o mapeamento do IdEquipamento
+            var solicitacaoEntidade = new SolicitacaoEntidade
+            {
+                Id = 1,
+                Descricao = "Teste Mapeamento",
+                Data = DateTime.Today,
+                TipoMC = (int)ManutencaoCalibracao.Calibracao,
+                IdEquipamento = "EQUIP-123"
+            };
+
+            _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(solicitacaoEntidade);
+
+            var result = await _service.GetSolicitacaoByIdAsync(1);
+
+            Assert.NotNull(result);
+            Assert.Equal("EQUIP-123", result.IdEquipamento);
+            Assert.Equal(ManutencaoCalibracao.Calibracao, result.TipoMC);
         }
 
         private class SolicitacaoServiceFake : SolicitacaoService

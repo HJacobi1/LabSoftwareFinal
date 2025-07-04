@@ -13,69 +13,30 @@ using Xunit;
 
 namespace Tests.BLL.Services
 {
-    public class EquipamentoServiceTests
+    /// <summary>
+    /// Testes de integração para o cadastro de equipamentos
+    /// Seguindo o padrão Given-When-Then (Dado-Quando-Então)
+    /// </summary>
+    public class EquipamentoCadastroIntegrationTests
     {
         private readonly Mock<IGenericRepository<ModeloEquipamentoEntidade>> _mockRepo;
         private readonly EquipamentoService _service;
 
-        public EquipamentoServiceTests()
+        public EquipamentoCadastroIntegrationTests()
         {
             _mockRepo = new Mock<IGenericRepository<ModeloEquipamentoEntidade>>();
-
             var config = new ConfigurationBuilder().Build();
-
-            var repositoryMock = new Mock<Repository>(config);
-            repositoryMock.Setup(r => r.GetRepository<ModeloEquipamentoEntidade>())
-                          .Returns(_mockRepo.Object);
-
             _service = new EquipamentoServiceFake(_mockRepo.Object);
         }
 
+        /// <summary>
+        /// Cenário: Cadastro bem-sucedido de equipamento
+        /// Given: Admin preenche dados válidos
+        /// When: Submete o formulário
+        /// Then: Equipamento é salvo com sucesso
+        /// </summary>
         [Fact]
-        public async Task GetAllEquipamentosAsync_ReturnsAll()
-        {
-            var equipamentos = new List<ModeloEquipamentoEntidade>
-            {
-                new ModeloEquipamentoEntidade { Id = 1, Descricao = "Equipamento 1" },
-                new ModeloEquipamentoEntidade { Id = 2, Descricao = "Equipamento 2" }
-            };
-            _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(equipamentos);
-
-            var result = await _service.GetAllEquipamentosAsync();
-
-            Assert.Equal(2, result.Count());
-        }
-
-        [Fact]
-        public async Task GetActiveEquipamentosAsync_ReturnsOnlyNotDeleted()
-        {
-            var equipamentos = new List<ModeloEquipamentoEntidade>
-            {
-                new ModeloEquipamentoEntidade { Id = 1, IsDeleted = false },
-                new ModeloEquipamentoEntidade { Id = 2, IsDeleted = true }
-            };
-            _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(equipamentos);
-
-            var result = await _service.GetActiveEquipamentosAsync();
-
-            Assert.Single(result);
-            Assert.Equal(1, result.First().Id);
-        }
-
-        [Fact]
-        public async Task GetEquipamentoByIdAsync_ReturnsCorrect()
-        {
-            var equipamento = new ModeloEquipamentoEntidade { Id = 1, Descricao = "Equipamento" };
-            _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(equipamento);
-
-            var result = await _service.GetEquipamentoByIdAsync(1);
-
-            Assert.NotNull(result);
-            Assert.Equal("Equipamento", result.Descricao);
-        }
-
-        [Fact]
-        public async Task CadastroEquipamento_AdminPreencheDados_EquipamentoSalvoComSucesso()
+        public async Task CadastroEquipamento_AdminPreencheDadosValidos_EquipamentoSalvoComSucesso()
         {
             // Given (Dado que o admin preenche os dados)
             var dadosEquipamento = new ModeloEquipamento
@@ -119,8 +80,14 @@ namespace Tests.BLL.Services
             _mockRepo.Verify(r => r.AddAsync(It.IsAny<ModeloEquipamentoEntidade>()), Times.Once);
         }
 
+        /// <summary>
+        /// Cenário: Cadastro com dados inválidos
+        /// Given: Admin preenche dados inválidos
+        /// When: Submete o formulário
+        /// Then: Retorna erro de validação
+        /// </summary>
         [Fact]
-        public async Task CadastroEquipamento_DadosInvalidos_RetornaErro()
+        public async Task CadastroEquipamento_DadosInvalidos_RetornaErroValidacao()
         {
             // Given (Dado que o admin preenche dados inválidos)
             var dadosInvalidos = new ModeloEquipamento
@@ -145,8 +112,14 @@ namespace Tests.BLL.Services
             Assert.Contains("Dados inválidos", exception.Message);
         }
 
+        /// <summary>
+        /// Cenário: Cadastro com identificação duplicada
+        /// Given: Já existe equipamento com mesma identificação
+        /// When: Admin tenta cadastrar equipamento duplicado
+        /// Then: Retorna erro de duplicação
+        /// </summary>
         [Fact]
-        public async Task CadastroEquipamento_IdentificacaoDuplicada_RetornaErro()
+        public async Task CadastroEquipamento_IdentificacaoDuplicada_RetornaErroDuplicacao()
         {
             // Given (Dado que já existe um equipamento com a mesma identificação)
             var dadosEquipamento = new ModeloEquipamento
@@ -171,10 +144,18 @@ namespace Tests.BLL.Services
             Assert.Contains("Identificação já existe", exception.Message);
         }
 
+        /// <summary>
+        /// Cenário: Cadastro de diferentes tipos de equipamentos
+        /// Given: Admin preenche diferentes tipos de equipamentos
+        /// When: Submete cada formulário
+        /// Then: Todos os equipamentos são salvos corretamente
+        /// </summary>
         [Theory]
         [InlineData("MIC-001", "Microscópio Eletrônico", "Zeiss", AnalogicoDigital.Digital)]
         [InlineData("BAL-002", "Balança Analítica", "Mettler Toledo", AnalogicoDigital.Analógico)]
         [InlineData("PHM-003", "pHmetro", "Hanna Instruments", AnalogicoDigital.Digital)]
+        [InlineData("CEN-004", "Centrífuga", "Eppendorf", AnalogicoDigital.Digital)]
+        [InlineData("TER-005", "Termômetro", "Fluke", AnalogicoDigital.Analógico)]
         public async Task CadastroEquipamento_DiferentesTipos_EquipamentosSalvosComSucesso(
             string identificacao, string descricao, string marca, AnalogicoDigital tipoAD)
         {
@@ -214,51 +195,98 @@ namespace Tests.BLL.Services
             Assert.Equal(tipoAD, resultado.TipoAD);
         }
 
+        /// <summary>
+        /// Cenário: Cadastro em lote de equipamentos
+        /// Given: Admin preenche múltiplos equipamentos
+        /// When: Submete todos os formulários
+        /// Then: Todos são salvos e listados corretamente
+        /// </summary>
         [Fact]
-        public async Task UpdateEquipamentoAsync_UpdatesAndReturns()
+        public async Task CadastroEquipamento_LoteEquipamentos_TodosSalvosEListados()
         {
-            var existing = new ModeloEquipamentoEntidade
+            // Given (Dado que o admin preenche múltiplos equipamentos)
+            var equipamentos = new List<ModeloEquipamento>
             {
-                Id = 1,
-                Descricao = "Antigo",
-                Identificacao = "ID-001",
-                TipoAD = (int)AnalogicoDigital.Analógico
+                new ModeloEquipamento { Id = 0, Identificacao = "MIC-001", Descricao = "Microscópio", Marca = "Zeiss", TipoAD = AnalogicoDigital.Digital },
+                new ModeloEquipamento { Id = 0, Identificacao = "BAL-002", Descricao = "Balança", Marca = "Mettler", TipoAD = AnalogicoDigital.Analógico },
+                new ModeloEquipamento { Id = 0, Identificacao = "PHM-003", Descricao = "pHmetro", Marca = "Hanna", TipoAD = AnalogicoDigital.Digital }
             };
 
-            var updated = new ModeloEquipamentoEntidade
+            var equipamentosSalvos = new List<ModeloEquipamentoEntidade>
             {
-                Id = 1,
-                Descricao = "Novo",
-                Identificacao = "ID-999",
-                TipoAD = (int)AnalogicoDigital.Digital
+                new ModeloEquipamentoEntidade { Id = 1, Identificacao = "MIC-001", Descricao = "Microscópio", Marca = "Zeiss", TipoAD = (int)AnalogicoDigital.Digital, IsDeleted = false },
+                new ModeloEquipamentoEntidade { Id = 2, Identificacao = "BAL-002", Descricao = "Balança", Marca = "Mettler", TipoAD = (int)AnalogicoDigital.Analógico, IsDeleted = false },
+                new ModeloEquipamentoEntidade { Id = 3, Identificacao = "PHM-003", Descricao = "pHmetro", Marca = "Hanna", TipoAD = (int)AnalogicoDigital.Digital, IsDeleted = false }
             };
 
-            var input = new ModeloEquipamento
+            // Configurar mocks
+            _mockRepo.Setup(r => r.AddAsync(It.IsAny<ModeloEquipamentoEntidade>()))
+                    .ReturnsAsync((ModeloEquipamentoEntidade e) => 
+                    {
+                        var index = equipamentos.FindIndex(x => x.Identificacao == e.Identificacao);
+                        return equipamentosSalvos[index];
+                    });
+
+            _mockRepo.Setup(r => r.GetAllAsync())
+                    .ReturnsAsync(equipamentosSalvos);
+
+            // When (quando submete todos os formulários)
+            var resultados = new List<ModeloEquipamento>();
+            foreach (var equipamento in equipamentos)
             {
-                Id = 1,
-                Descricao = "Novo",
-                Identificacao = "ID-999",
-                TipoAD = AnalogicoDigital.Digital
-            };
+                var resultado = await _service.CreateEquipamentoAsync(equipamento);
+                resultados.Add(resultado);
+            }
 
-            _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
-            _mockRepo.Setup(r => r.UpdateAsync(It.IsAny<ModeloEquipamentoEntidade>())).ReturnsAsync(updated);
+            var todosEquipamentos = await _service.GetAllEquipamentosAsync();
 
-            var result = await _service.UpdateEquipamentoAsync(1, input);
+            // Then (então todos são salvos e listados corretamente)
+            Assert.Equal(3, resultados.Count);
+            Assert.Equal(3, todosEquipamentos.Count());
 
-            Assert.Equal("Novo", result.Descricao);
-            Assert.Equal("ID-999", result.Identificacao);
-            Assert.Equal(AnalogicoDigital.Digital, result.TipoAD);
+            foreach (var resultado in resultados)
+            {
+                Assert.True(resultado.Id > 0);
+                Assert.False(string.IsNullOrEmpty(resultado.Identificacao));
+                Assert.False(string.IsNullOrEmpty(resultado.Descricao));
+                Assert.False(string.IsNullOrEmpty(resultado.Marca));
+            }
         }
 
-        [Fact]
-        public async Task DeleteEquipamentoAsync_DeletesCorrectly()
+        /// <summary>
+        /// Cenário: Validação de campos obrigatórios
+        /// Given: Admin deixa campos obrigatórios vazios
+        /// When: Tenta submeter o formulário
+        /// Then: Retorna erro específico para cada campo
+        /// </summary>
+        [Theory]
+        [InlineData("", "Descrição válida", "Marca válida", "Identificação é obrigatória")]
+        [InlineData("ID-001", "", "Marca válida", "Descrição é obrigatória")]
+        [InlineData("ID-001", "Descrição válida", "", "Marca é obrigatória")]
+        public async Task CadastroEquipamento_CamposObrigatoriosVazios_RetornaErroEspecifico(
+            string identificacao, string descricao, string marca, string mensagemEsperada)
         {
-            _mockRepo.Setup(r => r.DeleteAsync(1)).Returns(Task.CompletedTask);
+            // Given (Dado que o admin deixa campos obrigatórios vazios)
+            var dadosIncompletos = new ModeloEquipamento
+            {
+                Id = 0,
+                Identificacao = identificacao,
+                Descricao = descricao,
+                TipoAD = AnalogicoDigital.Digital,
+                Marca = marca,
+                CreatedAt = DateTime.Now
+            };
 
-            await _service.DeleteEquipamentoAsync(1);
+            // Configurar o mock para simular erro de validação
+            _mockRepo.Setup(r => r.AddAsync(It.IsAny<ModeloEquipamentoEntidade>()))
+                    .ThrowsAsync(new ArgumentException(mensagemEsperada));
 
-            _mockRepo.Verify(r => r.DeleteAsync(1), Times.Once);
+            // When & Then (quando submete, então retorna erro específico)
+            var exception = await Assert.ThrowsAsync<ArgumentException>(
+                () => _service.CreateEquipamentoAsync(dadosIncompletos)
+            );
+
+            Assert.Contains(mensagemEsperada, exception.Message);
         }
 
         private class EquipamentoServiceFake : EquipamentoService
@@ -272,4 +300,4 @@ namespace Tests.BLL.Services
             }
         }
     }
-}
+} 

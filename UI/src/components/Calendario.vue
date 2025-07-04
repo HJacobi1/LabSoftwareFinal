@@ -1,167 +1,185 @@
 <template>
   <div class="calendario">
     <div class="header">
-      <h2>Calendário de Eventos</h2>
-      <div class="calendar-controls">
-        <button @click="mesAnterior" class="btn-nav">
-          <i class="fas fa-chevron-left"></i>
+      <h2>Calendário de Solicitações</h2>
+      <div class="header-actions">
+        <button @click="mesAnterior" class="btn btn-secondary">
+          <i class="fas fa-chevron-left"></i> Mês Anterior
         </button>
-        <span class="mes-atual">{{ mesAtualNome }} {{ anoAtual }}</span>
-        <button @click="mesProximo" class="btn-nav">
-          <i class="fas fa-chevron-right"></i>
+        <span class="mes-atual">{{ mesAtualLabel }}</span>
+        <button @click="mesProximo" class="btn btn-secondary">
+          Próximo Mês <i class="fas fa-chevron-right"></i>
+        </button>
+        <button @click="irParaSolicitacoes" class="btn btn-primary">
+          <i class="fas fa-list"></i> Ver Solicitações
         </button>
       </div>
     </div>
 
-    <div class="calendar">
-      <!-- Cabeçalho dos dias da semana -->
-      <div class="calendar-header">
-        <div v-for="dia in diasSemana" :key="dia" class="day-header">
-          {{ dia }}
-        </div>
-      </div>
 
-      <!-- Dias do calendário -->
-      <div class="calendar-grid">
-        <div
-          v-for="(dia, index) in diasCalendario"
-          :key="index"
-          :class="[
-            'day',
-            {
-              'empty': !dia.data,
-              'today': dia.hoje,
-              'has-events': dia.eventos && dia.eventos.length > 0
-            }
-          ]"
-          @click="dia.data ? selecionarDia(dia) : null"
-        >
-          <span v-if="dia.data" class="day-number">{{ dia.numero }}</span>
-          <div v-if="dia.eventos && dia.eventos.length > 0" class="event-indicators">
-            <div
-              v-for="(evento, idx) in dia.eventos.slice(0, 3)"
-              :key="idx"
-              class="event-dot"
-              :class="getEventClass(evento.tipo)"
-              :title="`${evento.tipo} - ${evento.equipamento}`"
-            ></div>
-            <span v-if="dia.eventos.length > 3" class="more-events">+{{ dia.eventos.length - 3 }}</span>
+    <!-- Calendário -->
+    <div class="calendar-container">
+      <div class="calendar">
+        <!-- Cabeçalho dos dias da semana -->
+        <div class="calendar-header">
+          <div v-for="dia in diasSemana" :key="dia" class="day-header">
+            {{ dia }}
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Modal de eventos do dia -->
-    <div v-if="showEventModal" class="modal-overlay" @click="fecharModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>Eventos do dia {{ formatarData(selectedDate) }}</h3>
-          <button @click="fecharModal" class="btn-close">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div v-if="eventosDiaSelecionado.length === 0" class="no-events">
-            <p>Nenhum evento agendado para este dia.</p>
-          </div>
-          <div v-else class="events-list">
+        <!-- Dias do calendário -->
+        <div class="calendar-body">
+          <div
+            v-for="(dia, index) in diasCalendario"
+            :key="index"
+            class="day"
+            :class="{
+              empty: !dia.data,
+              today: dia.hoje,
+              'has-events': dia.eventos && dia.eventos.length > 0,
+            }"
+            @click="dia.data ? selecionarDia(dia) : null"
+          >
+            <span v-if="dia.data" class="day-number">{{ dia.numero }}</span>
             <div
-              v-for="evento in eventosDiaSelecionado"
-              :key="evento.id"
-              class="event-card"
-              :class="getEventClass(evento.tipo)"
+              v-if="dia.eventos && dia.eventos.length > 0"
+              class="event-indicators"
             >
-              <div class="event-header">
-                <span class="event-type">{{ evento.tipo }}</span>
-                <span class="event-time">{{ evento.horario }}</span>
-              </div>
-              <div class="event-details">
-                <p><strong>Equipamento:</strong> {{ evento.equipamento }}</p>
-                <p><strong>Responsável:</strong> {{ evento.responsavel }}</p>
-                <p v-if="evento.descricao"><strong>Descrição:</strong> {{ evento.descricao }}</p>
-              </div>
-              <div class="event-actions">
-                <button @click="editarEvento(evento)" class="btn btn-small btn-secondary">
-                  <i class="fas fa-edit"></i> Editar
-                </button>
-                <button @click="excluirEvento(evento.id)" class="btn btn-small btn-danger">
-                  <i class="fas fa-trash"></i> Excluir
-                </button>
-              </div>
+              <div
+                v-for="(evento, idx) in dia.eventos.slice(0, 3)"
+                :key="idx"
+                class="event-dot"
+                :class="getEventoClass(evento.TipoMC)"
+                :title="`${getTipoLabel(evento.TipoMC)} - ${getEquipamentoInfo(
+                  evento.IdEquipamento
+                )}`"
+              ></div>
+              <span v-if="dia.eventos.length > 3" class="more-events"
+                >+{{ dia.eventos.length - 3 }}</span
+              >
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button @click="novoEvento" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Novo Evento
-          </button>
+      </div>
+    </div>
+
+    <!-- Detalhes dos eventos do dia selecionado -->
+    <div v-if="diaSelecionado" class="event-details">
+      <div class="details-header">
+        <h3>Eventos do dia {{ formatDate(diaSelecionado.data) }}</h3>
+        <button @click="diaSelecionado = null" class="btn-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div
+        v-if="diaSelecionado.eventos && diaSelecionado.eventos.length > 0"
+        class="events-list"
+      >
+        <div
+          v-for="evento in diaSelecionado.eventos"
+          :key="evento.Id"
+          class="event-card"
+          :class="getEventoClass(evento.TipoMC)"
+        >
+          <div class="event-header">
+            <span class="event-type">{{ getTipoLabel(evento.TipoMC) }}</span>
+            <span class="event-id">#{{ evento.Id }}</span>
+          </div>
+          <div class="event-body">
+            <p>
+              <strong>Equipamento:</strong>
+              {{ getEquipamentoInfo(evento.IdEquipamento) }}
+            </p>
+            <p v-if="evento.Descricao">
+              <strong>Descrição:</strong> {{ evento.Descricao }}
+            </p>
+            <p><strong>Data:</strong> {{ formatDate(evento.Data) }}</p>
+          </div>
+          <div class="event-actions">
+            <button
+              @click="editarSolicitacao(evento)"
+              class="btn btn-small btn-secondary"
+            >
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button
+              @click="excluirSolicitacao(evento.Id)"
+              class="btn btn-small btn-danger"
+            >
+              <i class="fas fa-trash"></i> Excluir
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div v-else class="no-events">
+        <p>Nenhum evento agendado para este dia.</p>
+        <button @click="novaSolicitacao" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Nova Solicitação
+        </button>
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="statistics">
+      <div class="stat-card">
+        <h4>Total de Solicitações</h4>
+        <span class="stat-number">{{ totalSolicitacoes }}</span>
+      </div>
+      <div class="stat-card">
+        <h4>Calibrações</h4>
+        <span class="stat-number">{{ estatisticas.calibracoes }}</span>
+      </div>
+      <div class="stat-card">
+        <h4>Manutenções</h4>
+        <span class="stat-number">{{ estatisticas.manutencoes }}</span>
+      </div>
+      <div class="stat-card">
+        <h4>Este Mês</h4>
+        <span class="stat-number">{{ estatisticas.esteMes }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+
+import { ref, reactive, computed, onMounted, watch } from "vue"
+import { useRouter } from "vue-router"
+
+const router = useRouter()
 
 // Estado do componente
 const mesAtual = ref(new Date().getMonth())
 const anoAtual = ref(new Date().getFullYear())
-const showEventModal = ref(false)
-const selectedDate = ref(null)
-const eventosDiaSelecionado = ref([])
 
-// Dados dos eventos (simulados - substituir por API)
-const eventos = ref({
-  "2025-07-05": [
-    {
-      id: 1,
-      tipo: "Manutenção",
-      equipamento: "Microscópio A",
-      responsavel: "Carlos Silva",
-      horario: "09:00",
-      descricao: "Manutenção preventiva mensal"
-    }
-  ],
-  "2025-07-12": [
-    {
-      id: 2,
-      tipo: "Calibração",
-      equipamento: "Balança B",
-      responsavel: "Ana Costa",
-      horario: "14:00",
-      descricao: "Calibração trimestral"
-    },
-    {
-      id: 3,
-      tipo: "Manutenção",
-      equipamento: "Centrífuga C",
-      responsavel: "João Santos",
-      horario: "16:00",
-      descricao: "Verificação de funcionamento"
-    }
-  ],
-  "2025-07-25": [
-    {
-      id: 4,
-      tipo: "Calibração",
-      equipamento: "PHmetro",
-      responsavel: "Maria Oliveira",
-      horario: "10:00",
-      descricao: "Calibração semestral"
-    }
-  ]
-})
+const solicitacoes = ref([])
+const equipamentos = ref([])
+const diaSelecionado = ref(null)
+const loading = ref(false)
 
 // Constantes
 const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-const meses = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-]
 
 // Computed properties
-const mesAtualNome = computed(() => meses[mesAtual.value])
+const mesAtualLabel = computed(() => {
+  const meses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+  ]
+  return `${meses[mesAtual.value]} ${anoAtual.value}`
+})
 
 const diasCalendario = computed(() => {
   const dias = []
@@ -173,28 +191,83 @@ const diasCalendario = computed(() => {
 
   // Dias vazios no início
   for (let i = 0; i < inicioSemana; i++) {
-    dias.push({ data: null, numero: '', eventos: [] })
+
+    dias.push({ data: null, numero: "", eventos: [] })
   }
 
   // Dias do mês
   for (let dia = 1; dia <= totalDias; dia++) {
     const data = new Date(anoAtual.value, mesAtual.value, dia)
-    const dataStr = formatarDataParaChave(data)
-    const eventosDia = eventos.value[dataStr] || []
-    const ehHoje = data.toDateString() === hoje.toDateString()
+    const dataStr = data.toISOString().split("T")[0]
+    const eventosDia = solicitacoes.value.filter((s) => {
+      const dataSolicitacao = new Date(s.Data).toISOString().split("T")[0]
+      return dataSolicitacao === dataStr
+    })
 
     dias.push({
       data: data,
       numero: dia,
+
+      hoje: data.toDateString() === hoje.toDateString(),
       eventos: eventosDia,
-      hoje: ehHoje
     })
   }
 
   return dias
 })
 
+const totalSolicitacoes = computed(() => solicitacoes.value.length)
+
+const estatisticas = computed(() => {
+  const calibracoes = solicitacoes.value.filter(
+    (s) => s.TipoMC === "Calibracao"
+  ).length
+  const manutencoes = solicitacoes.value.filter(
+    (s) => s.TipoMC === "Manutencao"
+  ).length
+
+  const mesAtualStr = `${anoAtual.value}-${String(mesAtual.value + 1).padStart(
+    2,
+    "0"
+  )}`
+  const esteMes = solicitacoes.value.filter((s) => {
+    const dataSolicitacao = new Date(s.Data).toISOString().split("T")[0]
+    return dataSolicitacao.startsWith(mesAtualStr)
+  }).length
+
+  return {
+    calibracoes,
+    manutencoes,
+    esteMes,
+  }
+})
+
 // Métodos
+const carregarSolicitacoes = async () => {
+  try {
+    loading.value = true
+    const response = await fetch("/api/solicitacao")
+    if (response.ok) {
+      solicitacoes.value = await response.json()
+    }
+  } catch (error) {
+    console.error("Erro ao carregar solicitações:", error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const carregarEquipamentos = async () => {
+  try {
+    const response = await fetch("/api/equipamento")
+    if (response.ok) {
+      equipamentos.value = await response.json()
+    }
+  } catch (error) {
+    console.error("Erro ao carregar equipamentos:", error)
+  }
+}
+
 const mesAnterior = () => {
   if (mesAtual.value === 0) {
     mesAtual.value = 11
@@ -214,57 +287,74 @@ const mesProximo = () => {
 }
 
 const selecionarDia = (dia) => {
-  selectedDate.value = dia.data
-  const dataStr = formatarDataParaChave(dia.data)
-  eventosDiaSelecionado.value = eventos.value[dataStr] || []
-  showEventModal.value = true
+
+  diaSelecionado.value = dia
 }
 
-const fecharModal = () => {
-  showEventModal.value = false
-  selectedDate.value = null
-  eventosDiaSelecionado.value = []
+const getTipoLabel = (tipo) => {
+  const labels = {
+    Calibracao: "Calibração",
+    Manutencao: "Manutenção",
+  }
+  return labels[tipo] || tipo
 }
 
-const formatarData = (data) => {
-  return data.toLocaleDateString('pt-BR')
-}
-
-const formatarDataParaChave = (data) => {
-  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`
-}
-
-const getEventClass = (tipo) => {
+const getEventoClass = (tipo) => {
   const classes = {
-    'Manutenção': 'event-manutencao',
-    'Calibração': 'event-calibracao',
-    'Verificação': 'event-verificacao'
+    Calibracao: "evento-calibracao",
+    Manutencao: "evento-manutencao",
   }
-  return classes[tipo] || 'event-default'
+  return classes[tipo] || ""
 }
 
-const novoEvento = () => {
-  // Implementar criação de novo evento
-  alert('Funcionalidade de novo evento será implementada')
+const getEquipamentoInfo = (idEquipamento) => {
+  const equip = equipamentos.value.find((e) => e.Id === idEquipamento)
+  return equip
+    ? `${equip.Identificacao} (${equip.NroPatrimonio || "N/A"})`
+    : "Equipamento não encontrado"
 }
 
-const editarEvento = (evento) => {
-  // Implementar edição de evento
-  alert(`Editar evento: ${evento.tipo} - ${evento.equipamento}`)
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("pt-BR")
 }
 
-const excluirEvento = (id) => {
-  if (confirm('Tem certeza que deseja excluir este evento?')) {
-    // Implementar exclusão de evento
-    alert(`Evento ${id} excluído`)
-    fecharModal()
+const irParaSolicitacoes = () => {
+  router.push("/solicitacoes")
+}
+
+const novaSolicitacao = () => {
+  router.push("/solicitacoes")
+}
+
+const editarSolicitacao = (solicitacao) => {
+  // Navegar para a página de solicitações com o ID para edição
+  router.push(`/solicitacoes?edit=${solicitacao.Id}`)
+}
+
+const excluirSolicitacao = async (id) => {
+  if (confirm("Tem certeza que deseja excluir esta solicitação?")) {
+    try {
+      const response = await fetch(`/api/solicitacao/${id}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        alert("Solicitação excluída com sucesso!")
+        await carregarSolicitacoes()
+        diaSelecionado.value = null
+      } else {
+        alert("Erro ao excluir solicitação")
+      }
+    } catch (error) {
+      console.error("Erro:", error)
+      alert("Erro ao excluir solicitação")
+    }
   }
 }
 
-// Carregar eventos ao montar o componente
-onMounted(() => {
-  // Aqui você pode carregar eventos da API
-  console.log('Calendário montado')
+// Carregar dados ao montar o componente
+onMounted(async () => {
+  await Promise.all([carregarSolicitacoes(), carregarEquipamentos()])
 })
 </script>
 
@@ -289,24 +379,11 @@ onMounted(() => {
   color: #333;
 }
 
-.calendar-controls {
+
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
-}
-
-.btn-nav {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.btn-nav:hover {
-  background-color: #f0f0f0;
+  gap: 15px;
 }
 
 .mes-atual {
@@ -317,50 +394,57 @@ onMounted(() => {
   text-align: center;
 }
 
-.calendar {
-  background: white;
+
+.calendar-container {
+  background-color: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.calendar {
+  width: 100%;
 }
 
 .calendar-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+
+  gap: 5px;
   margin-bottom: 10px;
 }
 
 .day-header {
-  padding: 15px 10px;
+
+  padding: 15px;
   text-align: center;
   font-weight: 600;
-  color: #666;
+  color: #333;
   background-color: #f8f9fa;
   border-radius: 5px;
 }
 
-.calendar-grid {
+.calendar-body {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+  gap: 5px;
 }
 
 .day {
-  min-height: 100px;
+  aspect-ratio: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
   padding: 10px;
-  border: 1px solid #eee;
+  position: relative;
   cursor: pointer;
   transition: all 0.3s;
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  background-color: white;
 }
 
-.day:hover {
-  background-color: #f8f9fa;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.day:hover:not(.empty) {
+  background-color: #e6f7ff;
+  border-color: #007bff;
 }
 
 .day.empty {
@@ -369,89 +453,71 @@ onMounted(() => {
 }
 
 .day.today {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
+
+  background-color: #fff3cd;
+  border-color: #ffc107;
 }
 
 .day.has-events {
-  background-color: #fff3e0;
+  background-color: #f0f8ff;
 }
 
 .day-number {
   font-weight: 600;
   color: #333;
-  margin-bottom: 5px;
+
+  font-size: 16px;
 }
 
 .event-indicators {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-wrap: wrap;
   gap: 2px;
-  margin-top: auto;
+  align-items: center;
 }
 
 .event-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  flex-shrink: 0;
+
 }
 
-.event-manutencao {
-  background-color: #ff9800;
+.evento-calibracao {
+  background-color: #28a745;
 }
 
-.event-calibracao {
-  background-color: #4caf50;
-}
-
-.event-verificacao {
-  background-color: #2196f3;
-}
-
-.event-default {
-  background-color: #9e9e9e;
+.evento-manutencao {
+  background-color: #ffc107;
 }
 
 .more-events {
   font-size: 10px;
   color: #666;
-  margin-left: 2px;
+  font-weight: 600;
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
+.event-details {
   background-color: white;
   border-radius: 10px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
-.modal-header {
+.details-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
   border-bottom: 1px solid #eee;
 }
 
-.modal-header h3 {
+.details-header h3 {
   margin: 0;
   color: #333;
 }
@@ -459,9 +525,10 @@ onMounted(() => {
 .btn-close {
   background: none;
   border: none;
-  font-size: 20px;
-  cursor: pointer;
+
+  font-size: 18px;
   color: #666;
+  cursor: pointer;
   padding: 5px;
 }
 
@@ -469,41 +536,27 @@ onMounted(() => {
   color: #333;
 }
 
-.modal-body {
-  padding: 20px;
-}
-
-.no-events {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
 
 .events-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 15px;
 }
 
 .event-card {
-  padding: 15px;
+
   border-radius: 8px;
+  padding: 15px;
   border-left: 4px solid;
 }
 
-.event-card.event-manutencao {
-  background-color: #fff3e0;
-  border-left-color: #ff9800;
+.evento-calibracao {
+  background-color: #d4edda;
+  border-left-color: #28a745;
 }
 
-.event-card.event-calibracao {
-  background-color: #e8f5e8;
-  border-left-color: #4caf50;
-}
-
-.event-card.event-verificacao {
-  background-color: #e3f2fd;
-  border-left-color: #2196f3;
+.evento-manutencao {
+  background-color: #fff3cd;
+  border-left-color: #ffc107;
 }
 
 .event-header {
@@ -516,20 +569,24 @@ onMounted(() => {
 .event-type {
   font-weight: 600;
   color: #333;
-}
 
-.event-time {
-  color: #666;
+  text-transform: uppercase;
   font-size: 14px;
 }
 
-.event-details p {
+.event-id {
+  color: #666;
+  font-size: 12px;
+}
+
+.event-body p {
   margin: 5px 0;
   color: #555;
   font-size: 14px;
 }
 
-.event-details strong {
+
+.event-body strong {
   color: #333;
 }
 
@@ -537,12 +594,42 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   margin-top: 15px;
+
+  padding-top: 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.modal-footer {
+.no-events {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background-color: white;
   padding: 20px;
-  border-top: 1px solid #eee;
-  text-align: right;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h4 {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: bold;
+  color: #007bff;
 }
 
 .btn {
@@ -563,7 +650,8 @@ onMounted(() => {
   color: white;
 }
 
-.btn-primary:hover {
+
+.btn-primary:hover:not(:disabled) {
   background-color: #0056b3;
 }
 
@@ -596,23 +684,32 @@ onMounted(() => {
     gap: 15px;
     text-align: center;
   }
-  
-  .calendar-controls {
-    gap: 10px;
+
+
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: center;
   }
-  
-  .mes-atual {
-    min-width: 120px;
+
+  .calendar-body {
+    gap: 2px;
   }
-  
+
   .day {
-    min-height: 80px;
-    padding: 8px;
+    padding: 5px;
   }
-  
-  .modal-content {
-    width: 95%;
-    margin: 10px;
+
+  .day-number {
+    font-size: 14px;
+  }
+
+  .event-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .statistics {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

@@ -48,7 +48,9 @@ namespace BLL.Services
 
             // Atualizar campos
             existing.Descricao = solicitacao.Descricao;
-            // Adicione outros campos conforme necessário
+            existing.Data = solicitacao.Data;
+            existing.TipoMC = (int)solicitacao.TipoMC;
+            existing.IdEquipamento = solicitacao.IdEquipamento;
 
             var updated = await _solicitacaoRepository.UpdateAsync(existing);
             return MapToBLL(updated);
@@ -67,6 +69,7 @@ namespace BLL.Services
                 Descricao = entidade.Descricao,
                 Data = entidade.Data,
                 TipoMC = (ManutencaoCalibracao)entidade.TipoMC,
+                IdEquipamento = entidade.IdEquipamento
             };
         }
 
@@ -78,6 +81,7 @@ namespace BLL.Services
                 Descricao = modelo.Descricao,
                 Data = modelo.Data,
                 TipoMC = (int)modelo.TipoMC,
+                IdEquipamento = modelo.IdEquipamento
             };
         }
     }
