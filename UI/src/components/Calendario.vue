@@ -16,6 +16,7 @@
       </div>
     </div>
 
+
     <!-- Calendário -->
     <div class="calendar-container">
       <div class="calendar">
@@ -143,6 +144,7 @@
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted, watch } from "vue"
 import { useRouter } from "vue-router"
 
@@ -151,6 +153,7 @@ const router = useRouter()
 // Estado do componente
 const mesAtual = ref(new Date().getMonth())
 const anoAtual = ref(new Date().getFullYear())
+
 const solicitacoes = ref([])
 const equipamentos = ref([])
 const diaSelecionado = ref(null)
@@ -188,6 +191,7 @@ const diasCalendario = computed(() => {
 
   // Dias vazios no início
   for (let i = 0; i < inicioSemana; i++) {
+
     dias.push({ data: null, numero: "", eventos: [] })
   }
 
@@ -203,6 +207,7 @@ const diasCalendario = computed(() => {
     dias.push({
       data: data,
       numero: dia,
+
       hoje: data.toDateString() === hoje.toDateString(),
       eventos: eventosDia,
     })
@@ -282,6 +287,7 @@ const mesProximo = () => {
 }
 
 const selecionarDia = (dia) => {
+
   diaSelecionado.value = dia
 }
 
@@ -373,6 +379,7 @@ onMounted(async () => {
   color: #333;
 }
 
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -386,6 +393,7 @@ onMounted(async () => {
   min-width: 150px;
   text-align: center;
 }
+
 
 .calendar-container {
   background-color: white;
@@ -402,11 +410,13 @@ onMounted(async () => {
 .calendar-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+
   gap: 5px;
   margin-bottom: 10px;
 }
 
 .day-header {
+
   padding: 15px;
   text-align: center;
   font-weight: 600;
@@ -443,6 +453,7 @@ onMounted(async () => {
 }
 
 .day.today {
+
   background-color: #fff3cd;
   border-color: #ffc107;
 }
@@ -454,6 +465,7 @@ onMounted(async () => {
 .day-number {
   font-weight: 600;
   color: #333;
+
   font-size: 16px;
 }
 
@@ -471,6 +483,7 @@ onMounted(async () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+
 }
 
 .evento-calibracao {
@@ -512,6 +525,7 @@ onMounted(async () => {
 .btn-close {
   background: none;
   border: none;
+
   font-size: 18px;
   color: #666;
   cursor: pointer;
@@ -522,12 +536,14 @@ onMounted(async () => {
   color: #333;
 }
 
+
 .events-list {
   display: grid;
   gap: 15px;
 }
 
 .event-card {
+
   border-radius: 8px;
   padding: 15px;
   border-left: 4px solid;
@@ -553,6 +569,7 @@ onMounted(async () => {
 .event-type {
   font-weight: 600;
   color: #333;
+
   text-transform: uppercase;
   font-size: 14px;
 }
@@ -568,6 +585,7 @@ onMounted(async () => {
   font-size: 14px;
 }
 
+
 .event-body strong {
   color: #333;
 }
@@ -576,6 +594,7 @@ onMounted(async () => {
   display: flex;
   gap: 10px;
   margin-top: 15px;
+
   padding-top: 15px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -631,6 +650,7 @@ onMounted(async () => {
   color: white;
 }
 
+
 .btn-primary:hover:not(:disabled) {
   background-color: #0056b3;
 }
@@ -664,6 +684,7 @@ onMounted(async () => {
     gap: 15px;
     text-align: center;
   }
+
 
   .header-actions {
     flex-wrap: wrap;

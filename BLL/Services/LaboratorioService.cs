@@ -35,7 +35,8 @@ namespace BLL.Services
             var laboratorios = await _laboratorioRepository.GetAllAsync();
             foreach (var lab in laboratorios)
             {
-                lab.Responsaveis = (await _usuarioRepository.GetByLaboratorioIdAsync(lab.Id)).Select(u => u.Pessoa).ToList();
+                var responsaveis = await _usuarioRepository.GetByLaboratorioIdAsync(lab.Id);
+                lab.Responsaveis = responsaveis.Select(u => u.Pessoa).ToList();
             }
             laboratorios = laboratorios.OrderBy(p => p.Id);
             return laboratorios.Where(l => !l.IsDeleted).Select(p => MapToBLL(p));
@@ -77,13 +78,20 @@ namespace BLL.Services
 
         private static Laboratorio MapToBLL(DAL.Models.LaboratorioEntidade Laboratorio)
         {
+            var responsaveis = new List<Pessoa>();
+            Laboratorio.Responsaveis.ForEach(r =>
+            {
+                responsaveis.Add(PessoaService.MapToBLL(r));
+            });            
+
             return new Laboratorio
             {
                 Id = Laboratorio.Id,
                 Codigo = Laboratorio.Codigo,
                 Nome = Laboratorio.Nome,
                 Endereco = Laboratorio.Endereco,
-                DataCriacao = Laboratorio.CreatedAt
+                DataCriacao = Laboratorio.CreatedAt,
+                Responsaveis = responsaveis
             };
         }
 

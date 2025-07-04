@@ -38,8 +38,11 @@ namespace DAL.Repositories
 
         public async Task<List<UsuarioEntidade>> GetByLaboratorioIdAsync(int id)
         {
-            var usuarios = await GetAllAsync();
-            return usuarios.Where(u => u.Pessoa != null && u.Pessoa.LaboratorioId == id).ToList();
+            var usuarios = _dbSet
+                .Include(u => u.Pessoa)
+                .Where(u => u.Pessoa.LaboratorioId == id).ToList();
+
+            return usuarios;
         }
 
         public async Task<UsuarioEntidade?> GetByPessoaIdAsync(int id)
